@@ -2,7 +2,11 @@ import React from 'react'
 
 const Login = () => {
   return (
-    <div></div>
+    <form className='min-h-[80vh] flex items-center'>
+      <div>
+        <p>{}</p>
+      </div>
+    </form>
   )
 }
 
