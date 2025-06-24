@@ -1,11 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState} from 'react'
 import { AppContext } from '../context/AppContext'
 import { useNavigate } from 'react-router-dom';
 
-const RelatedDoctors = () => {
+const RelatedDoctors = ({ speciality, docId }) => {
     const {doctors }=useContext(AppContext);
-    const [relDocs,setRelDocs]=useState();
+    const [relDocs,setRelDocs]=useState([]);
     const navigate=useNavigate();
+    
 
     useEffect(()=>{
         if(doctors.length >0 && speciality){
@@ -25,7 +26,7 @@ const RelatedDoctors = () => {
             {relDocs.slice(0, 5).map((item, index) => (
             <div
                 key={index}
-                onClick={() => navigate(`/appointment/${item._id}`)}
+                onClick={() => {navigate(`/appointment/${item._id}`);scrollTo(0,0)}}
                 className='border border-blue-200 rounded-xl overflow-hidden cursor-pointer hover:translate-y-[-10px] transition-all duration-500'
             >
                 <img className='bg-blue-50 w-full h-48 object-cover' src={item.image} alt="" />
