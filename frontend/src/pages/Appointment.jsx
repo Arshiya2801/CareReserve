@@ -2,6 +2,7 @@ import React, { Suspense, useContext, useEffect, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import { useParams } from 'react-router-dom';
 import { assets } from '../assets/assets';
+import RelatedDoctors from '../components/RelatedDoctors';
 
 const Appointment = () => {
   const { doctors, currencySymbol } = useContext(AppContext);
@@ -125,7 +126,10 @@ const Appointment = () => {
             </p>
           ))}
         </div>
+        <button className='bg-primary text-white text-sm font-light px-14 py-3 rounded-full my-6'>Book Appointment</button>
       </div>
+
+      <RelatedDoctors docId={docId} speciality={docInfo.speciality}/>
     </div>
   );
 };
