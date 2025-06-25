@@ -1,66 +1,147 @@
-import React, { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
-import {assets} from '../assets/assets'
-
+import React, { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { assets } from '../assets/assets';
 
 const Navbar = () => {
-  const navigate=useNavigate();
-  const [showMenu,setShowMenu]=useState(false);
-  const [token,setToken]=useState(true);
+  const navigate = useNavigate();
+  const [showMenu, setShowMenu] = useState(false);
+  const [token, setToken] = useState(true); // Set to false if not logged in
+
+  const navLinks = [
+    { name: 'HOME', path: '/' },
+    { name: 'ALL DOCTORS', path: '/doctors' },
+    { name: 'ABOUT', path: '/about' },
+    { name: 'CONTACT', path: '/contact' },
+  ];
+
   return (
-    <div className='flex items-center justify-between text-sm py-4 mb-5 border-b border-b-gray-400'>
-        <img onClick={()=>navigate('/')}className='w-44 cursor-pointer' src={assets.logo} alt="" />
-        <ul className='hidden md:flex items-start gap-5 font-medium'>
-          <NavLink to='/'>
-            <li>HOME</li>
-            <hr className='border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden'/>
-          </NavLink>
-          <NavLink to='/doctors'>
-            <li>ALL DOCTORS</li>
-            <hr className='border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden'/>
-          </NavLink>
-          <NavLink to='/about'>
-            <li>ABOUT</li>
-            <hr className='border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden'/>
-          </NavLink>
-          <NavLink to='/contact'>
-            <li>CONTACT</li>
-            <hr className='border-none outline-none h-0.5 bg-primary w-3/5 m-auto hidden'/>
-          </NavLink>
+    <nav className="w-full border-b border-gray-300 px-4 md:px-8 py-4 mb-5 text-sm">
+      <div className="flex items-center justify-between">
+        {/* Logo */}
+        <img
+          onClick={() => navigate('/')}
+          src={assets.logo}
+          alt="CareReserve Logo"
+          className="w-36 md:w-40 cursor-pointer"
+        />
+
+        {/* Desktop Nav */}
+        <ul className="hidden md:flex items-center gap-6 font-medium">
+          {navLinks.map((link) => (
+            <li key={link.name}>
+              <NavLink
+                to={link.path}
+                className={({ isActive }) =>
+                  `${isActive ? 'text-primary' : ''} hover:text-primary transition`
+                }
+              >
+                {link.name}
+              </NavLink>
+            </li>
+          ))}
         </ul>
-        <div className='flex items-center gap-4'>
-          {
-            token? <div  className='flex items-center gap-2 cursor-pointer group relative'>
-              <img  className=' w-8 rounded-full'src={assets.profile_pic} alt=""/>
-              <img className='w-2.5' src={assets.dropdown_icon} alt=""/>
-              <div className='absolute top-0 right-0 pt-14 text-base font-medium text-gray-600 z-20 hidden group-hover:block'>
-                <div className='min-w-48 bg-stone-100 rounded flex flex-col gap-4 p-4'>
-                  <p onClick={()=>navigate('/my-profile')} className='hover:text-black cursor-pointer'>My Profile</p>
-                  <p onClick={()=>navigate('/my-appointments')} className='hover:text-black cursor-pointer'>My Appointments</p>
-                  <p onClick={()=>setToken(false)} className='hover:text-black cursor-pointer'>Logout</p>
-                </div>
+
+        {/* Profile / Create Account / Hamburger */}
+        <div className="flex items-center gap-4">
+          {token ? (
+            <div className="relative group cursor-pointer">
+              <div className="flex items-center gap-2">
+                <img
+                  src={assets.profile_pic}
+                  alt="User profile"
+                  className="w-8 h-8 rounded-full"
+                />
+                <img
+                  src={assets.dropdown_icon}
+                  alt="Dropdown"
+                  className="w-2.5"
+                />
               </div>
-            </div>:
-            <button onClick={()=>navigate('/login')} className='bg-primary text-white px-8 py-3 rounded-full font -light hidden md:block'>Create Account</button>
 
-          }
-          <img onClick={()=>setShowMenu(true)} className='w-6 md:hidden'src={assets.menu_icon} alt="" />
-          <div className={`${showMenu?'fixed w-full':'h-0 w-0'}md:hidden right-0 top-0 bottom-0 z-20 overflow-hidden bg-white transition-all`}>
-            <div className='flex items-center justify-between px-5 py-6'>
-              <img className='w-36' src={assets.logo} alt="" />
-              <img className='w-7'onClick={()=>setShowMenu(false)} src={assets.cross_icon} alt="" />
+              {/* Dropdown */}
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white shadow-md rounded hidden group-hover:block z-20 text-sm text-gray-700">
+                <button
+                  onClick={() => navigate('/my-profile')}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                >
+                  My Profile
+                </button>
+                <button
+                  onClick={() => navigate('/my-appointments')}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                >
+                  My Appointments
+                </button>
+                <button
+                  onClick={() => setToken(false)}
+                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                >
+                  Logout
+                </button>
+              </div>
             </div>
-            <ul className='flex flex-col items-center gap-2 mt-5 px-5 text-lg font-medium'>
-              <NavLink  onClick={()=>setShowMenu(false)} to='/'><p className='px-4 py-2 items-center gap-2 mt-5 px-5 text-lg font-medium'>HOME</p></NavLink>
-              <NavLink onClick={()=>setShowMenu(false)} to='/doctors'><p className='px-4 py-2 items-center gap-2 mt-5 px-5 text-lg font-medium'>ALL DOCTORS</p></NavLink>
-              <NavLink  onClick={()=>setShowMenu(false)} to='/about'><p className='px-4 py-2 items-center gap-2 mt-5 px-5 text-lg font-medium'>ABOUT</p></NavLink>
-              <NavLink  onClick={()=>setShowMenu(false)} to='/contact'><p className='px-4 py-2 items-center gap-2 mt-5 px-5 text-lg font-medium'>CONTACT</p></NavLink>
-            </ul>
-          </div>
+          ) : (
+            <button
+              onClick={() => navigate('/login')}
+              className="hidden md:block bg-primary text-white px-6 py-2 rounded-full"
+            >
+              Create Account
+            </button>
+          )}
+
+          {/* Hamburger for mobile */}
+          <img
+            src={assets.menu_icon}
+            alt="Menu"
+            onClick={() => setShowMenu(true)}
+            className="w-6 cursor-pointer md:hidden"
+          />
         </div>
-    </div>
-  )
-}
+      </div>
 
-export default Navbar
+      {/* Mobile Menu */}
+      <div
+        className={`fixed top-0 right-0 w-full h-full bg-white z-50 transition-transform duration-300 ${
+          showMenu ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="flex justify-between items-center px-5 py-4 border-b border-gray-300">
+          <img src={assets.logo} alt="Logo" className="w-36" />
+          <img
+            src={assets.cross_icon}
+            alt="Close Menu"
+            onClick={() => setShowMenu(false)}
+            className="w-7 cursor-pointer"
+          />
+        </div>
 
+        <ul className="flex flex-col items-center gap-6 mt-10 text-lg font-medium">
+          {navLinks.map((link) => (
+            <li key={link.name}>
+              <NavLink
+                to={link.path}
+                onClick={() => setShowMenu(false)}
+                className="hover:text-primary"
+              >
+                {link.name}
+              </NavLink>
+            </li>
+          ))}
+          {!token && (
+            <button
+              onClick={() => {
+                navigate('/login');
+                setShowMenu(false);
+              }}
+              className="mt-4 bg-primary text-white px-6 py-2 rounded-full"
+            >
+              Create Account
+            </button>
+          )}
+        </ul>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;

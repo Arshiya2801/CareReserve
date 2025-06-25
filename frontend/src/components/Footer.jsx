@@ -1,39 +1,47 @@
-import React from 'react'
-import { assets } from '../assets/assets'
+import React from 'react';
+import { assets } from '../assets/assets';
 
 const Footer = () => {
-  return (
-    <div className='md:mx-10'>
-        <div className='flex flex-col sm:grid grid grid-cols-[3fr_1fr_1fr] gap-14 my-10 mt-40 text-sm'>
-            <div >
-                <img className='mb-5 w-40' src={assets.logo} alt=''/>
-                <p className='w-full md:w-2/3 text-gray-600 leading-6'>At CareReserve, we connect patients with trusted healthcare professionals — making it easy to book appointments, access quality care, and manage your health anytime, anywhere.</p>
+    return (
+        <footer className="px-4 md:px-10 mt-20 text-sm text-gray-600">
+        {/* Top Footer */}
+        <div className="flex flex-col md:grid md:grid-cols-[3fr_1fr_1fr] gap-14 mb-10">
+            {/* Logo + Description */}
+            <div>
+            <img className="mb-5 w-40" src={assets.logo} alt="CareReserve logo" />
+            <p className="md:w-2/3 leading-6">
+                At CareReserve, we connect patients with trusted healthcare professionals — making it
+                easy to book appointments, access quality care, and manage your health anytime, anywhere.
+            </p>
             </div>
-            <div className='text-xl font-medium mb-5' > 
-                <p>COMPANY</p>
-                <ul className='flex flex-col gap-2 text-gray-600 text-sm mt-5'>
-                    <li>Home</li>
-                    <li>About Us</li>
-                    <li>Contact us</li>
-                    <li>Privacy policy</li>
-                </ul>
+
+            {/* Company Links */}
+            <div>
+            <h3 className="text-base font-semibold text-gray-800 mb-4">COMPANY</h3>
+            <ul className="space-y-2">
+                <li><a href="/" className="hover:underline">Home</a></li>
+                <li><a href="/about" className="hover:underline">About Us</a></li>
+                <li><a href="/contact" className="hover:underline">Contact Us</a></li>
+                <li><a href="/privacy" className="hover:underline">Privacy Policy</a></li>
+            </ul>
             </div>
-            <div className='text-xl font-medium mb-5'>
-                <p>GET IN TOUCH</p>
-                <ul className='flex flex-col gap-2 text-gray-600 mt-5 text-sm'>
-                    <li>+1-213-456-6542</li>
-                    <li>CareReserve@gmail.com</li>
-                </ul>
-            </div>
-        </div>
-        <div>
-            <hr />
-            <p className='py-5 text-sm text-center'>Copyright © 2025 CareReserve - All Right Reserved.</p>
+
+            {/* Contact Info */}
+            <div>
+            <h3 className="text-base font-semibold text-gray-800 mb-4">GET IN TOUCH</h3>
+            <ul className="space-y-2">
+                <li>+1-213-456-6542</li>
+                <li>CareReserve@gmail.com</li>
+            </ul>
             </div>
         </div>
 
-    
-    )
-}
+        {/* Bottom Footer */}
+        <div className="border-t border-gray-200 pt-5 text-center text-xs text-gray-500">
+            © 2025 CareReserve — All Rights Reserved.
+        </div>
+        </footer>
+    );
+};
 
-export default Footer
+export default Footer;
