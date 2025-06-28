@@ -1,10 +1,10 @@
- Doctor & Hospital Appointment Booking Platform
+# 🩺 Doctor & Hospital Appointment Booking Platform
 
 An online appointment booking system for doctors and hospitals, enabling users to easily find doctors by specialty, select convenient time slots, and book appointments within a 7-day window.
 
 ---
 
-## Project Description
+##  Project Description
 
 This project is a comprehensive doctor/hospital appointment booking website built in multiple phases:
 
@@ -15,14 +15,14 @@ This project is a comprehensive doctor/hospital appointment booking website buil
 
 ---
 
-## Technologies Used
+## ⚙️ Technologies Used
 
-### Frontend
+###  Frontend
 - React JS
 - Tailwind CSS
 
 
-## Features
+## 🔥 Features
 
 - **Doctor browsing and filtering:** Search doctors by specialty.
 - **Appointment booking:** Book appointments within a 7-day window, selecting date and time slot.
