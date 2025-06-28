@@ -1,12 +1,47 @@
-# React + Vite
+ Doctor & Hospital Appointment Booking Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An online appointment booking system for doctors and hospitals, enabling users to easily find doctors by specialty, select convenient time slots, and book appointments within a 7-day window.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Project Description
 
-## Expanding the ESLint configuration
+This project is a comprehensive doctor/hospital appointment booking website built in multiple phases:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Users can browse and filter doctors by specialty.
+- Users can select a date and time slot within a 7-day window to book an appointment.
+- Admin dashboard to manage bookings and create new doctor profiles.
+- Doctor dashboard for doctors to manage their profiles, view bookings, and track earnings.
+
+---
+
+## Technologies Used
+
+### Frontend
+- React JS
+- Tailwind CSS
+
+
+## Features
+
+- **Doctor browsing and filtering:** Search doctors by specialty.
+- **Appointment booking:** Book appointments within a 7-day window, selecting date and time slot.
+- **Admin dashboard:** Manage all bookings and add new doctors.
+- **Doctor dashboard:** Manage profile, check bookings, and view earnings.
+- **Responsive UI:** Built with Tailwind CSS for great mobile and desktop experience.
+
+---
+
+## Installation
+
+### Frontend Setup
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/Arshiya2801/Doctor-Booking-Platform.git
+   cd Doctor-Booking-Platform/frontend
+2. ```bash
+   npm install
+3. ```bash
+   npm start
