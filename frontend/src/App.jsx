@@ -1,5 +1,5 @@
 import React from 'react'
-import {Route, Routes} from 'react-router-dom'
+import {Route, Routes, Navigate} from 'react-router-dom'
 import Home from './pages/Home'
 import About from './pages/About'
 import Contact from './pages/Contact'
@@ -35,7 +35,8 @@ const App = () => {
         <Route path='/patient/dashboard' element={<ProtectedRoute allowedRoles={['patient']}><PatientDashboard/></ProtectedRoute>} />
         <Route path='/my-appointments' element={<ProtectedRoute allowedRoles={['patient']}><MyAppointments/></ProtectedRoute>} />
         <Route path='/my-profile' element={<ProtectedRoute allowedRoles={['patient', 'doctor']}><MyProfile/></ProtectedRoute>} />
-        <Route path='/appointment/:docId' element={<ProtectedRoute allowedRoles={['patient']}><Appointment/></ProtectedRoute>} />
+        {/* Legacy route redirect */}
+        <Route path='/appointment/:docId' element={<Navigate to="/doctors" replace />} />
 
         {/* Protected Doctor Routes */}
         <Route path='/doctor/dashboard' element={<ProtectedRoute allowedRoles={['doctor']}><DoctorDashboard/></ProtectedRoute>} />
