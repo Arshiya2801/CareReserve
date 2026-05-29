@@ -1,21 +1,31 @@
-import React, { useState } from 'react'
-import { assets } from '../assets/assets'
+import React, { useContext, useEffect, useState } from 'react';
+import { assets } from '../assets/assets';
+import { AppContext } from '../context/AppContext';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const MyProfile = () => {
-  const [userData,setUserData] =useState({
-    name: 'Akshat Singh',
-    image:assets.profile_pic,
-    email:'singhakshat@gmail.com',
-    phone:'+91 9382356626',
-    address:{
-      line1:'57th Cross, Sector-5',
-      line2:'New Delhi, India'
-    },
-    gender: 'Male',
-    dob:'2000-01-20'
-  })
+  const { backendUrl, token } = useContext(AppContext);
+  const [userData, setUserData] = useState(null);
+  const [isEdit, setIsEdit] = useState(false);
 
-  const [isEdit,setIsEdit] =useState(false)
+  const loadUserProfileData = async () => {
+    try {
+      const { data } = await axios.get(backendUrl + '/api/users/profile', { headers: { Authorization: `Bearer ${token}` } });
+      setUserData(data);
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      loadUserProfileData();
+    }
+  }, [token]);
+
+  if (!userData) return <div>Loading...</div>;
   return (
     <div className='max-w-lg flex-col gap-2 text-sm'>
         <img className='w-36 rounded'src={userData.image} alt="" />

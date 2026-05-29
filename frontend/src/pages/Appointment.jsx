@@ -1,12 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../context/AppContext';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { assets } from '../assets/assets';
 import RelatedDoctors from '../components/RelatedDoctors';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const Appointment = () => {
-  const { doctors, currencySymbol } = useContext(AppContext);
+  const { doctors, currencySymbol, backendUrl, token, getDoctorsData } = useContext(AppContext);
   const { docId } = useParams();
+  const navigate = useNavigate();
   const [docInfo, setDocInfo] = useState(null);
 
   const daysofWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -62,6 +65,41 @@ const Appointment = () => {
   useEffect(() => {
     fetchDocInfo();
   }, [doctors, docId]);
+
+  const bookAppointment = async () => {
+    if (!token) {
+      toast.error("Please login to book appointment");
+      return navigate('/login');
+    }
+
+    if (!slotTime) {
+      return toast.error("Please select a time slot");
+    }
+
+    try {
+      const date = docSlots[slotIndex][0].dateTime;
+      
+      let day = date.getDate();
+      let month = date.getMonth() + 1;
+      let year = date.getFullYear();
+
+      const slotDate = `${day}_${month}_${year}`;
+
+      const { data } = await axios.post(
+        backendUrl + '/api/appointments/book',
+        { docId, slotDate, slotTime },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success("Appointment booked successfully!");
+      getDoctorsData(); // Refresh doctors to update available slots
+      navigate('/my-appointments');
+
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || error.message);
+    }
+  };
 
   return (
     docInfo && (
@@ -155,7 +193,7 @@ const Appointment = () => {
               ))}
           </div>
 
-          <button className="bg-primary text-white px-8 py-3 rounded-full mt-6 hover:scale-105 transition-all text-sm">
+          <button onClick={bookAppointment} className="bg-primary text-white px-8 py-3 rounded-full mt-6 hover:scale-105 transition-all text-sm">
             Book Appointment
           </button>
         </div>

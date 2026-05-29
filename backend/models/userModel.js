@@ -21,8 +21,8 @@ const userSchema = new mongoose.Schema(
       default: "0000000000"
     },
     address: {
-      type: String,
-      default: "Not Provided"
+      line1: { type: String, default: "Not Provided" },
+      line2: { type: String, default: "" }
     },
     dob: {
       type: String,

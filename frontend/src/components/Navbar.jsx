@@ -74,7 +74,10 @@ const Navbar = () => {
                   My Appointments
                 </button>
                 <button
-                  onClick={() => setToken(false)}
+                  onClick={() => {
+                    setToken(false);
+                    localStorage.removeItem('token');
+                  }}
                   className="w-full text-left px-4 py-2 hover:bg-gray-100"
                 >
                   Logout
