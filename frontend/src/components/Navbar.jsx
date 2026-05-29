@@ -19,21 +19,24 @@ const Navbar = () => {
     <nav className="w-full border-b border-gray-300 px-4 md:px-8 py-4 mb-5 text-sm">
       <div className="flex items-center justify-between">
         {/* Logo */}
-        <img
+        <div
           onClick={() => navigate('/')}
-          src={assets.logo}
-          alt="CareReserve Logo"
-          className="w-36 md:w-40 cursor-pointer"
-        />
+          className="cursor-pointer flex items-center gap-2"
+        >
+          <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg flex items-center justify-center text-white font-bold text-xl">
+            M
+          </div>
+          <span className="text-2xl font-bold text-gray-800 tracking-tight">Medi<span className="text-primary">Queue</span></span>
+        </div>
 
         {/* Desktop Nav */}
-        <ul className="hidden md:flex items-center gap-6 font-medium">
+        <ul className="hidden md:flex items-center gap-8 font-medium text-gray-600">
           {navLinks.map((link) => (
             <li key={link.name}>
               <NavLink
                 to={link.path}
                 className={({ isActive }) =>
-                  `${isActive ? 'text-primary' : ''} hover:text-primary transition`
+                  `${isActive ? 'text-primary font-semibold' : ''} hover:text-primary transition`
                 }
               >
                 {link.name}
@@ -50,7 +53,7 @@ const Navbar = () => {
                 <img
                   src={assets.profile_pic}
                   alt="User profile"
-                  className="w-8 h-8 rounded-full"
+                  className="w-10 h-10 rounded-full border-2 border-primary"
                 />
                 <img
                   src={assets.dropdown_icon}
@@ -60,16 +63,16 @@ const Navbar = () => {
               </div>
 
               {/* Dropdown */}
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white shadow-md rounded hidden group-hover:block z-20 text-sm text-gray-700">
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white shadow-xl rounded-lg hidden group-hover:block z-20 text-sm text-gray-700 overflow-hidden border border-gray-100">
                 <button
                   onClick={() => navigate('/my-profile')}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                  className="w-full text-left px-4 py-3 hover:bg-accent transition"
                 >
                   My Profile
                 </button>
                 <button
                   onClick={() => navigate('/my-appointments')}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                  className="w-full text-left px-4 py-3 hover:bg-accent transition"
                 >
                   My Appointments
                 </button>
@@ -78,19 +81,27 @@ const Navbar = () => {
                     setToken(false);
                     localStorage.removeItem('token');
                   }}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                  className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 transition"
                 >
                   Logout
                 </button>
               </div>
             </div>
           ) : (
-            <button
-              onClick={() => navigate('/login')}
-              className="hidden md:block bg-primary text-white px-6 py-2 rounded-full"
-            >
-              Create Account
-            </button>
+            <div className="hidden md:flex items-center gap-3">
+              <button
+                onClick={() => navigate('/login')}
+                className="text-gray-600 font-medium hover:text-primary px-4 py-2 transition"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => navigate('/login')}
+                className="bg-gradient-to-r from-primary to-secondary text-white font-medium px-6 py-2.5 rounded-full hover:shadow-lg hover:scale-105 transition-all"
+              >
+                Sign Up
+              </button>
+            </div>
           )}
 
           {/* Hamburger for mobile */}
