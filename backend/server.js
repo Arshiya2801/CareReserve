@@ -2,12 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
+import userRoutes from './routes/userRoute.js';
+import doctorRoutes from './routes/doctorRoute.js';
+import appointmentRoutes from './routes/appointmentRoute.js';
 
 // Load env vars
 dotenv.config();
 
 // Connect to database
-// connectDB(); // Uncomment when MongoDB URI is added to .env
+connectDB();
 
 const app = express();
 
@@ -17,10 +20,9 @@ app.use(express.json());
 // Enable CORS
 app.use(cors());
 
-// Mount routers
-// app.use('/api/users', userRoutes);
-// app.use('/api/doctors', doctorRoutes);
-// app.use('/api/appointments', appointmentRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/doctors', doctorRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');
