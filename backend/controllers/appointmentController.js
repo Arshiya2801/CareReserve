@@ -71,4 +71,45 @@ const myAppointments = async (req, res) => {
   }
 };
 
-export { bookAppointment, myAppointments };
+// @desc    Complete an appointment (Doctor/Admin action)
+// @route   PUT /api/appointments/complete/:id
+// @access  Private (should be restricted to doc, but keeping it simple for now)
+const completeAppointment = async (req, res) => {
+  try {
+    const appointmentId = req.params.id;
+    const appointment = await Appointment.findById(appointmentId);
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+
+    appointment.isCompleted = true;
+    await appointment.save();
+
+    // Broadcast queue update to all patients in this doctor's specific date room
+    const io = req.app.get('io');
+    const room = `${appointment.docId}_${appointment.slotDate}`;
+    
+    // Fetch remaining pending appointments for this doctor on this date, sorted by time/creation
+    // This is simple queue logic: count how many are pending to update positions
+    const pendingAppointments = await Appointment.find({
+      docId: appointment.docId,
+      slotDate: appointment.slotDate,
+      isCompleted: false,
+      cancelled: false
+    }).sort({ slotTime: 1, _id: 1 }); // Sort by time, then arrival
+
+    // Broadcast the new queue state to the room
+    io.to(room).emit('queue_update', {
+      message: 'Queue advanced',
+      pendingCount: pendingAppointments.length,
+      nextUp: pendingAppointments.length > 0 ? pendingAppointments[0]._id : null
+    });
+
+    res.json({ message: 'Appointment completed and queue updated' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export { bookAppointment, myAppointments, completeAppointment };
