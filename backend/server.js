@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import http from 'http';
+import { Server } from 'socket.io';
 import connectDB from './config/db.js';
 import userRoutes from './routes/userRoute.js';
 import doctorRoutes from './routes/doctorRoute.js';
@@ -13,6 +15,8 @@ dotenv.config();
 connectDB();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*" } });
 
 // Body parser
 app.use(express.json());
