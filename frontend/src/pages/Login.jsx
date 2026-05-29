@@ -51,6 +51,12 @@ const Login = () => {
         localStorage.setItem('token', data.token);
         setToken(data.token);
         toast.success("Logged in successfully!");
+        
+        if (data.role === 'doctor') {
+          navigate('/doctor/dashboard');
+        } else {
+          navigate('/patient/dashboard');
+        }
       }
     } catch (error) {
       console.error(error);

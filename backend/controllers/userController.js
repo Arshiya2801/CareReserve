@@ -25,7 +25,8 @@ const registerUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        token: generateToken(user._id),
+        role: user.role,
+        token: generateToken(user._id, user.role),
       });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
@@ -49,7 +50,8 @@ const loginUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        token: generateToken(user._id),
+        role: user.role,
+        token: generateToken(user._id, user.role),
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
@@ -76,6 +78,7 @@ const getUserProfile = async (req, res) => {
         dob: user.dob,
         gender: user.gender,
         image: user.image,
+        role: user.role,
       });
     } else {
       res.status(404).json({ message: 'User not found' });

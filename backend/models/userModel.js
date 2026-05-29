@@ -35,6 +35,16 @@ const userSchema = new mongoose.Schema(
     image: {
       type: String,
       default: ""
+    },
+    role: {
+      type: String,
+      enum: ['patient', 'doctor', 'admin'],
+      default: 'patient'
+    },
+    doctorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Doctor',
+      required: false
     }
   },
   {

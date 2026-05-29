@@ -77,16 +77,17 @@ const Signup = () => {
     if (!validate()) return;
 
     try {
-      if (role === 'Doctor') {
-        toast.info("Doctor registration is currently pending admin approval. Please register as a patient or contact support.");
-        return;
-      }
-      
-      const { data } = await axios.post(backendUrl + '/api/users/register', { name, email, password, phone });
+      const { data } = await axios.post(backendUrl + '/api/users/register', { name, email, password, phone, role: role.toLowerCase() });
       if (data.token) {
         localStorage.setItem('token', data.token);
         setToken(data.token);
         toast.success("Account created successfully!");
+        
+        if (data.role === 'doctor') {
+          navigate('/doctor/dashboard');
+        } else {
+          navigate('/patient/dashboard');
+        }
       }
     } catch (error) {
       console.error(error);
