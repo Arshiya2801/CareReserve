@@ -6,7 +6,15 @@ import Doctor from '../models/doctorModel.js';
 const getDoctors = async (req, res) => {
   try {
     const doctors = await Doctor.find({});
-    res.json(doctors);
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:4000';
+    const docsWithImages = doctors.map(doc => {
+      const docObj = doc.toObject();
+      return {
+        ...docObj,
+        image: docObj.image ? `${backendUrl}/images/${docObj.image}` : ''
+      };
+    });
+    res.json(docsWithImages);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -20,6 +20,9 @@ app.use(express.json());
 // Enable CORS
 app.use(cors());
 
+// Serve static files (images)
+app.use('/images', express.static('public/images'));
+
 app.use('/api/users', userRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/appointments', appointmentRoutes);
