@@ -12,6 +12,7 @@ import Appointment from './pages/Appointment'
 import DesignSystem from './pages/DesignSystem'
 import PatientDashboard from './pages/patient/PatientDashboard'
 import DoctorDashboard from './pages/doctor/DoctorDashboard'
+import DoctorProfile from './pages/DoctorProfile'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -30,6 +31,7 @@ const App = () => {
         <Route path='/contact' element={<Contact/>} />
         <Route path='/doctors/:speciality' element={<Doctors/>} />
         <Route path='/doctors' element={<Doctors/>} />
+        <Route path='/doctor/:docId' element={<DoctorProfile/>} />
         
         {/* Protected Patient Routes */}
         <Route path='/patient/dashboard' element={<ProtectedRoute allowedRoles={['patient']}><PatientDashboard/></ProtectedRoute>} />

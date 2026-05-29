@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '../ui/Card';
 import EmptyState from '../ui/EmptyState';
 import { assets } from '../../assets/assets';
+import { Link } from 'react-router-dom';
 
 const DoctorPreview = ({ doctor, currencySymbol }) => {
   if (!doctor) {
@@ -58,13 +59,20 @@ const DoctorPreview = ({ doctor, currencySymbol }) => {
 
         <div className="mt-8 pt-6 border-t border-gray-100 dark:border-slate-700">
           <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-3">Location</h3>
-          <div className="flex items-start gap-3 text-gray-600 dark:text-gray-400 text-sm">
+          <div className="flex items-start gap-3 text-gray-600 dark:text-gray-400 text-sm mb-6">
             <svg className="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             <p>
               {doctor.address?.line1}<br/>
               {doctor.address?.line2}
             </p>
           </div>
+          
+          <Link 
+            to={`/doctor/${doctor._id}`}
+            className="w-full flex items-center justify-center py-3 px-4 bg-gray-50 dark:bg-slate-800 text-primary font-bold rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-primary hover:text-white hover:border-primary transition-all duration-300"
+          >
+            View Full Profile
+          </Link>
         </div>
       </CardContent>
     </Card>
