@@ -9,6 +9,7 @@ import Signup from './pages/Signup'
 import MyAppointments from './pages/MyAppointments'
 import MyProfile from './pages/MyProfile'
 import Appointment from './pages/Appointment'
+import DesignSystem from './pages/DesignSystem'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -21,6 +22,7 @@ const App = () => {
         {/* Public Routes */}
         <Route path='/login' element={<Login/>} />
         <Route path='/signup' element={<Signup/>} />
+        <Route path='/design-system' element={<DesignSystem/>} />
         
         {/* Protected Routes */}
         <Route path='/' element={<ProtectedRoute><Home/></ProtectedRoute>} />
