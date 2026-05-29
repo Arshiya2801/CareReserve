@@ -22,17 +22,17 @@ const App = () => {
       <Navbar/>
       <Routes>
         {/* Public Routes */}
+        <Route path='/' element={<Home/>} />
         <Route path='/login' element={<Login/>} />
         <Route path='/signup' element={<Signup/>} />
         <Route path='/design-system' element={<DesignSystem/>} />
+        <Route path='/about' element={<About/>} />
+        <Route path='/contact' element={<Contact/>} />
+        <Route path='/doctors/:speciality' element={<Doctors/>} />
+        <Route path='/doctors' element={<Doctors/>} />
         
         {/* Protected Patient Routes */}
         <Route path='/patient/dashboard' element={<ProtectedRoute allowedRoles={['patient']}><PatientDashboard/></ProtectedRoute>} />
-        <Route path='/' element={<ProtectedRoute allowedRoles={['patient']}><Home/></ProtectedRoute>} />
-        <Route path='/about' element={<ProtectedRoute allowedRoles={['patient']}><About/></ProtectedRoute>} />
-        <Route path='/contact' element={<ProtectedRoute allowedRoles={['patient']}><Contact/></ProtectedRoute>} />
-        <Route path='/doctors/:speciality' element={<ProtectedRoute allowedRoles={['patient']}><Doctors/></ProtectedRoute>} />
-        <Route path='/doctors' element={<ProtectedRoute allowedRoles={['patient']}><Doctors/></ProtectedRoute>} />
         <Route path='/my-appointments' element={<ProtectedRoute allowedRoles={['patient']}><MyAppointments/></ProtectedRoute>} />
         <Route path='/my-profile' element={<ProtectedRoute allowedRoles={['patient', 'doctor']}><MyProfile/></ProtectedRoute>} />
         <Route path='/appointment/:docId' element={<ProtectedRoute allowedRoles={['patient']}><Appointment/></ProtectedRoute>} />
