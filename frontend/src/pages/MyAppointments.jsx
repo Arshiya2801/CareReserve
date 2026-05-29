@@ -8,7 +8,7 @@ const MyAppointments = () => {
   const { backendUrl, token } = useContext(AppContext);
   const [appointments, setAppointments] = useState([]);
   const [socket, setSocket] = useState(null);
-  const [queueInfo, setQueueInfo] = useState({}); // To track queue info per room/appointment
+  const [queueInfo, setQueueInfo] = useState({});
 
   const getUserAppointments = async () => {
     try {
@@ -31,7 +31,6 @@ const MyAppointments = () => {
       const newSocket = io(backendUrl);
       setSocket(newSocket);
 
-      // Join rooms for all pending appointments
       appointments.forEach(app => {
         if (!app.isCompleted && !app.cancelled) {
           newSocket.emit('join_queue', { docId: app.docId, date: app.slotDate });
@@ -39,8 +38,6 @@ const MyAppointments = () => {
       });
 
       newSocket.on('queue_update', (data) => {
-        // data contains pendingCount, nextUp, etc.
-        // For simplicity, we just store it globally, but you could map it per doc/date if needed
         setQueueInfo(data);
       });
 
@@ -49,67 +46,95 @@ const MyAppointments = () => {
   }, [appointments, backendUrl]);
 
   return (
-    <div className="px-4 md:px-8 lg:px-12 py-8">
-      <p className="text-lg font-semibold text-zinc-700 border-b pb-3 mb-6">
-        My Appointments
-      </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="mb-8">
+        <h2 className="text-3xl font-extrabold text-gray-900">My Appointments</h2>
+        <p className="text-gray-500 mt-2">Manage your bookings and track your wait time in real-time.</p>
+      </div>
       
+      {/* Premium Real-Time Queue Widget */}
       {queueInfo.pendingCount !== undefined && (
-        <div className="bg-blue-100 text-blue-800 p-4 rounded-lg mb-6 shadow-sm border border-blue-200">
-          <p className="font-bold flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-            Real-Time Queue Update
-          </p>
-          <p className="text-sm mt-1">There are currently <b>{queueInfo.pendingCount}</b> patients waiting in the queue.</p>
+        <div className="bg-gradient-to-r from-primary to-secondary p-[1px] rounded-2xl shadow-xl mb-10 transform hover:scale-[1.01] transition-transform duration-300">
+          <div className="bg-white p-6 rounded-2xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl"></div>
+            
+            <div className="flex items-center gap-4 z-10 w-full sm:w-auto">
+              <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center relative">
+                <div className="absolute inset-0 border-2 border-primary rounded-full animate-ping opacity-20"></div>
+                <span className="w-4 h-4 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(13,148,136,0.8)]"></span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Live Queue Tracking</h3>
+                <p className="text-sm text-gray-500">Your doctor's current waiting room status</p>
+              </div>
+            </div>
+
+            <div className="mt-4 sm:mt-0 bg-gray-50 border border-gray-100 px-6 py-3 rounded-xl flex flex-col items-center z-10 w-full sm:w-auto">
+              <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+                {queueInfo.pendingCount}
+              </span>
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Patients Waiting</span>
+            </div>
+          </div>
         </div>
       )}
 
-      <div className="space-y-6">
+      {/* Appointment Cards */}
+      <div className="grid grid-cols-1 gap-6">
         {appointments.map((item, index) => (
           <div
             key={index}
-            className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6 border-b pb-6 relative"
+            className={`flex flex-col md:flex-row gap-6 p-6 rounded-2xl border transition-all duration-300 ${
+              item.isCompleted ? 'bg-gray-50 border-gray-200 opacity-80' : 'bg-white border-teal-50 shadow-sm hover:shadow-md'
+            } relative overflow-hidden`}
           >
             {item.isCompleted && (
-               <div className="absolute top-0 right-0 bg-green-100 text-green-700 px-3 py-1 rounded-bl-lg text-xs font-bold">COMPLETED</div>
+               <div className="absolute top-4 right-4 bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                 COMPLETED
+               </div>
             )}
+            
             {/* Doctor Image */}
-            <div className="flex-shrink-0">
-              <img
-                src={item.docData.image}
-                alt={item.docData.name}
-                className="w-32 h-32 object-cover rounded-lg bg-indigo-50"
-              />
+            <div className="flex-shrink-0 relative group">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-xl overflow-hidden bg-accent relative z-10">
+                <img
+                  src={item.docData.image}
+                  alt={item.docData.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              </div>
             </div>
 
             {/* Appointment Info */}
-            <div className="flex-1 text-sm text-zinc-600">
-              <p className="text-neutral-800 font-semibold">{item.docData.name}</p>
-              <p>{item.docData.speciality}</p>
-
-              <div className="mt-2">
-                <p className="text-zinc-700 font-medium">Address</p>
-                <p className="text-xs">{item.docData.address?.line1}</p>
-                <p className="text-xs">{item.docData.address?.line2}</p>
+            <div className="flex-1 flex flex-col justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">{item.docData.name}</h3>
+                <p className="text-sm font-semibold text-secondary mb-3">{item.docData.speciality}</p>
+                
+                <div className="flex items-start gap-2 text-sm text-gray-600 mb-2">
+                  <span className="text-gray-400 mt-0.5">📍</span>
+                  <p>{item.docData.address?.line1}<br/>{item.docData.address?.line2}</p>
+                </div>
               </div>
 
-              <p className="text-xs mt-2">
-                <span className="text-sm text-neutral-700 font-medium">
-                  Date & Time:
-                </span>{' '}
-                {item.slotDate} | {item.slotTime}
-              </p>
+              <div className="bg-accent/30 rounded-lg px-4 py-3 mt-4 inline-flex items-center gap-3 border border-teal-50">
+                <span className="text-xl">📅</span>
+                <div>
+                  <p className="text-xs text-gray-500 font-medium">Scheduled For</p>
+                  <p className="text-sm font-bold text-gray-900">{item.slotDate} <span className="text-gray-400 mx-1">|</span> <span className="text-primary">{item.slotTime}</span></p>
+                </div>
+              </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col gap-2 mt-4 sm:mt-0 sm:justify-end">
+            <div className="flex flex-col gap-3 justify-center min-w-[200px]">
               {!item.isCompleted && (
                 <>
-                  <button className="text-sm text-stone-600 border py-2 rounded hover:bg-primary hover:text-white transition-all sm:min-w-[180px]">
+                  <button className="w-full text-sm font-semibold bg-gray-50 text-gray-700 border border-gray-200 py-3 rounded-xl hover:bg-gray-100 hover:text-gray-900 transition-all">
                     Pay Online
                   </button>
-                  <button className="text-sm text-stone-600 border py-2 rounded hover:bg-red-600 hover:text-white transition-all sm:min-w-[180px]">
-                    Cancel Appointment
+                  <button className="w-full text-sm font-semibold bg-red-50 text-red-600 border border-red-100 py-3 rounded-xl hover:bg-red-500 hover:text-white transition-all">
+                    Cancel Booking
                   </button>
                   {/* TEST BUTTON for Queue Tracking */}
                   <button 
@@ -122,14 +147,22 @@ const MyAppointments = () => {
                         toast.error(error.message);
                       }
                     }}
-                    className="text-sm text-white bg-green-500 border py-2 rounded hover:bg-green-600 transition-all sm:min-w-[180px]">
-                    Complete (Simulate Doctor)
+                    className="w-full text-sm font-semibold bg-gradient-to-r from-primary to-secondary text-white py-3 rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all mt-2">
+                    Simulate Doctor Visit
                   </button>
                 </>
               )}
             </div>
           </div>
         ))}
+        {appointments.length === 0 && (
+          <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+            <p className="text-gray-500 mb-4">You have no upcoming appointments.</p>
+            <button onClick={() => window.location.href='/doctors'} className="bg-primary text-white px-6 py-2.5 rounded-full font-medium hover:bg-teal-700 transition-colors">
+              Book an Appointment
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
