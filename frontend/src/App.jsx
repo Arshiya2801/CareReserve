@@ -5,6 +5,7 @@ import About from './pages/About'
 import Contact from './pages/Contact'
 import Doctors from './pages/Doctors'
 import Login from './pages/Login'
+import Signup from './pages/Signup'
 import MyAppointments from './pages/MyAppointments'
 import MyProfile from './pages/MyProfile'
 import Appointment from './pages/Appointment'
@@ -19,6 +20,7 @@ const App = () => {
       <Routes>
         {/* Public Routes */}
         <Route path='/login' element={<Login/>} />
+        <Route path='/signup' element={<Signup/>} />
         
         {/* Protected Routes */}
         <Route path='/' element={<ProtectedRoute><Home/></ProtectedRoute>} />

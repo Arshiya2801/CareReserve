@@ -2,17 +2,15 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { assets } from '../assets/assets';
 
 const Login = () => {
   const { backendUrl, token, setToken } = useContext(AppContext);
   const navigate = useNavigate();
 
-  const [state, setState] = useState('Login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   
   // New UI features
   const [showPassword, setShowPassword] = useState(false);
@@ -39,10 +37,6 @@ const Login = () => {
       newErrors.password = "Password must be at least 6 characters";
     }
 
-    if (state === 'Sign Up' && !name) {
-      newErrors.name = "Full Name is required";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -52,20 +46,11 @@ const Login = () => {
     if (!validate()) return;
 
     try {
-      if (state === 'Sign Up') {
-        const { data } = await axios.post(backendUrl + '/api/users/register', { name, email, password });
-        if (data.token) {
-          localStorage.setItem('token', data.token);
-          setToken(data.token);
-          toast.success("Account created successfully!");
-        }
-      } else {
-        const { data } = await axios.post(backendUrl + '/api/users/login', { email, password });
-        if (data.token) {
-          localStorage.setItem('token', data.token);
-          setToken(data.token);
-          toast.success("Logged in successfully!");
-        }
+      const { data } = await axios.post(backendUrl + '/api/users/login', { email, password });
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        setToken(data.token);
+        toast.success("Logged in successfully!");
       }
     } catch (error) {
       console.error(error);
@@ -95,14 +80,8 @@ const Login = () => {
         {/* Right Side: Form */}
         <div className="w-full md:w-1/2 p-8 sm:p-12 lg:p-16 flex flex-col justify-center">
           <div className="mb-8">
-            <h3 className="text-3xl font-bold text-gray-900 mb-2">
-              {state === 'Sign Up' ? 'Create Account' : 'Welcome Back'}
-            </h3>
-            <p className="text-gray-500">
-              {state === 'Sign Up' 
-                ? 'Join our premium network of healthcare professionals.' 
-                : 'Please enter your details to sign in.'}
-            </p>
+            <h3 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h3>
+            <p className="text-gray-500">Please enter your details to sign in.</p>
           </div>
 
           <form onSubmit={onSubmitHandler} className="space-y-5">
@@ -126,20 +105,6 @@ const Login = () => {
               <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">Or log in with email</span>
               <div className="flex-grow border-t border-gray-200"></div>
             </div>
-
-            {state === 'Sign Up' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input 
-                  type="text" 
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className={`w-full px-4 py-3 rounded-xl border ${errors.name ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all`}
-                  placeholder="John Doe"
-                />
-                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
-              </div>
-            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
@@ -174,41 +139,33 @@ const Login = () => {
               {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
             </div>
 
-            {state === 'Login' && (
-              <div className="flex items-center justify-between mt-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={rememberMe}
-                    onChange={() => setRememberMe(!rememberMe)}
-                    className="w-4 h-4 rounded text-primary focus:ring-primary border-gray-300 accent-primary" 
-                  />
-                  <span className="text-sm text-gray-600">Remember me</span>
-                </label>
-                <button type="button" className="text-sm font-semibold text-primary hover:underline">
-                  Forgot Password?
-                </button>
-              </div>
-            )}
+            <div className="flex items-center justify-between mt-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  checked={rememberMe}
+                  onChange={() => setRememberMe(!rememberMe)}
+                  className="w-4 h-4 rounded text-primary focus:ring-primary border-gray-300 accent-primary" 
+                />
+                <span className="text-sm text-gray-600">Remember me</span>
+              </label>
+              <button type="button" className="text-sm font-semibold text-primary hover:underline">
+                Forgot Password?
+              </button>
+            </div>
 
             <button 
               type="submit" 
               className="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold py-3.5 px-4 rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all mt-4"
             >
-              {state === 'Sign Up' ? 'Create Account' : 'Login'}
+              Login
             </button>
 
             <p className="text-center text-sm text-gray-600 mt-6">
-              {state === 'Sign Up' ? "Already have an account? " : "Don't have an account? "}
-              <span 
-                className="text-primary font-bold cursor-pointer hover:underline"
-                onClick={() => {
-                  setState(state === 'Sign Up' ? 'Login' : 'Sign Up');
-                  setErrors({});
-                }}
-              >
-                {state === 'Sign Up' ? 'Log in' : 'Sign Up'}
-              </span>
+              Don't have an account? 
+              <Link to="/signup" className="text-primary font-bold hover:underline ml-1">
+                Sign Up
+              </Link>
             </p>
           </form>
         </div>
