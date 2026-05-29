@@ -41,6 +41,7 @@ import hero_illustration from './hero_illustration.png'
 import testimonial_1 from './testimonial_1.png'
 import testimonial_2 from './testimonial_2.png'
 import testimonial_3 from './testimonial_3.png'
+import login_illustration from './login_illustration.png'
 
 
 export const assets = {
@@ -64,7 +65,8 @@ export const assets = {
     hero_illustration,
     testimonial_1,
     testimonial_2,
-    testimonial_3
+    testimonial_3,
+    login_illustration
 }
 
 export const specialityData = [
