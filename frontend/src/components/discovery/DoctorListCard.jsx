@@ -1,4 +1,5 @@
 import React from 'react';
+import { assets } from '../../assets/assets';
 
 const DoctorListCard = ({ doctor, isSelected, onClick }) => {
   return (
@@ -14,6 +15,7 @@ const DoctorListCard = ({ doctor, isSelected, onClick }) => {
           <img 
             src={doctor.image} 
             alt={doctor.name} 
+            onError={(e) => { e.target.onerror = null; e.target.src = assets.profile_pic; }}
             className="w-16 h-16 rounded-full object-cover bg-accent dark:bg-slate-700 border-2 border-white dark:border-slate-600 shadow-sm"
           />
           {doctor.available && (

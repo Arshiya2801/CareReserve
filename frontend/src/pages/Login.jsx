@@ -2,12 +2,14 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { assets } from '../assets/assets';
 
 const Login = () => {
   const { backendUrl, token, setToken } = useContext(AppContext);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const role = searchParams.get('role') || 'patient';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,7 +21,12 @@ const Login = () => {
 
   useEffect(() => {
     if (token) {
-      navigate('/');
+      const savedRole = localStorage.getItem('role');
+      if (savedRole === 'doctor') {
+        navigate('/doctor/dashboard');
+      } else {
+        navigate('/patient/dashboard');
+      }
     }
   }, [token, navigate]);
 
@@ -49,6 +56,7 @@ const Login = () => {
       const { data } = await axios.post(backendUrl + '/api/users/login', { email, password });
       if (data.token) {
         localStorage.setItem('token', data.token);
+        localStorage.setItem('role', data.role);
         setToken(data.token);
         toast.success("Logged in successfully!");
         
@@ -169,7 +177,7 @@ const Login = () => {
 
             <p className="text-center text-sm text-gray-600 mt-6">
               Don't have an account? 
-              <Link to="/signup" className="text-primary font-bold hover:underline ml-1">
+              <Link to={`/signup?role=${role}`} className="text-primary font-bold hover:underline ml-1">
                 Sign Up
               </Link>
             </p>

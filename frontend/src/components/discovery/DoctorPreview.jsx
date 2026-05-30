@@ -22,6 +22,7 @@ const DoctorPreview = ({ doctor, currencySymbol }) => {
           <img 
             src={doctor.image} 
             alt={doctor.name}
+            onError={(e) => { e.target.onerror = null; e.target.src = assets.profile_pic; }}
             className="w-24 h-24 rounded-2xl object-cover bg-white p-1 shadow-lg border border-gray-100"
           />
         </div>

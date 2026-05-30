@@ -2,26 +2,33 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { assets } from '../assets/assets';
 
 const Signup = () => {
   const { backendUrl, token, setToken } = useContext(AppContext);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialRole = searchParams.get('role');
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [gender, setGender] = useState('Male');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState('Patient');
+  const [role, setRole] = useState(initialRole === 'doctor' ? 'Doctor' : 'Patient');
 
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (token) {
-      navigate('/');
+      const savedRole = localStorage.getItem('role');
+      if (savedRole === 'doctor') {
+        navigate('/doctor/dashboard');
+      } else {
+        navigate('/patient/dashboard');
+      }
     }
   }, [token, navigate]);
 
@@ -72,6 +79,7 @@ const Signup = () => {
       const { data } = await axios.post(backendUrl + '/api/users/register', { name, email, password, gender, role: role.toLowerCase() });
       if (data.token) {
         localStorage.setItem('token', data.token);
+        localStorage.setItem('role', data.role);
         setToken(data.token);
         toast.success("Account created successfully!");
         
@@ -224,7 +232,7 @@ const Signup = () => {
             </button>
 
             <p className="text-center text-sm text-gray-600 mt-6">
-              Already have an account? <Link to="/login" className="text-primary font-bold hover:underline">Login</Link>
+              Already have an account? <Link to={`/login?role=${role.toLowerCase()}`} className="text-primary font-bold hover:underline">Login</Link>
             </p>
           </form>
         </div>
