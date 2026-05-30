@@ -104,6 +104,26 @@ const doctorsData = [
         about: 'Dr. King adopts a prevention-first mindset, emphasizing wellness education, regular checkups.',
         fees: 3500,
         address: { line1: '47th Cross, Richmond', line2: 'Circle, Ring Road, London' }
+    },
+    {
+        name: 'Dr. Zoe Kelly',
+        image: '/src/assets/doc11.png',
+        speciality: 'Neurologist',
+        degree: 'MBBS',
+        experience: '4 Years',
+        about: 'Dr. Kelly is passionate about proactive care that starts with prevention and builds toward lasting health.',
+        fees: 1290,
+        address: { line1: '57th Cross, Richmond', line2: 'Circle, Ring Road, London' }
+    },
+    {
+        name: 'Dr. Patrick Harris',
+        image: '/src/assets/doc12.png',
+        speciality: 'Gastroenterologist',
+        degree: 'MBBS',
+        experience: '4 Years',
+        about: 'Dr. Harris blends technology and personal care to offer detailed diagnostics and preventative plans.',
+        fees: 3020,
+        address: { line1: '57th Cross, Richmond', line2: 'Circle, Ring Road, London' }
     }
 ];
 
@@ -122,7 +142,7 @@ const seedData = async () => {
         await connectDB();
         await Doctor.deleteMany();
         await Doctor.insertMany(doctorsData);
-        console.log('Successfully seeded 10 doctors!');
+        console.log('Successfully seeded 12 doctors!');
         process.exit();
     } catch (error) {
         console.error(error);

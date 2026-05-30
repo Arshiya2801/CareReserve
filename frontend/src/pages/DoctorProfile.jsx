@@ -92,9 +92,6 @@ const DoctorProfile = () => {
               </div>
               
               <div className="flex gap-3 w-full md:w-auto">
-                <Button variant="outline" className="flex-1 md:flex-none" onClick={() => navigate('/login?role=patient')}>
-                  Book Appointment
-                </Button>
               </div>
             </div>
 

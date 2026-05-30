@@ -48,6 +48,16 @@ const Navbar = () => {
             <li key={link.name}>
               <a
                 href={link.path}
+                onClick={(e) => {
+                  if (window.location.pathname === '/') {
+                    e.preventDefault();
+                    const id = link.path.split('#')[1];
+                    const element = document.getElementById(id);
+                    if (element) {
+                      element.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }
+                }}
                 className="hover:text-primary transition"
               >
                 {link.name}
@@ -95,13 +105,23 @@ const Navbar = () => {
           />
         </div>
 
-        <ul className="flex flex-col items-center gap-6 mt-10 text-lg font-medium text-gray-800 dark:text-white">
+        <ul className="flex flex-col items-center gap-6 mt-10 text-xl font-medium text-gray-900 dark:text-white">
           {navLinks.map((link) => (
             <li key={link.name}>
               <a
                 href={link.path}
-                onClick={() => setShowMenu(false)}
-                className="hover:text-primary"
+                onClick={(e) => {
+                  if (window.location.pathname === '/') {
+                    e.preventDefault();
+                    const id = link.path.split('#')[1];
+                    const element = document.getElementById(id);
+                    if (element) {
+                      element.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }
+                  setShowMenu(false);
+                }}
+                className="hover:text-primary transition"
               >
                 {link.name}
               </a>
