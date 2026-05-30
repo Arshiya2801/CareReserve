@@ -9,7 +9,7 @@ const QueueTracking = () => {
   const { appointmentId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { backendUrl } = useContext(AppContext);
+  const { backendUrl, socket } = useContext(AppContext);
 
   // Initial State setup
   const [currentPatient, setCurrentPatient] = useState(12);
@@ -25,56 +25,43 @@ const QueueTracking = () => {
   const { doctor, selectedDate, selectedTime } = location.state || {};
 
   useEffect(() => {
-    // 1. Establish Socket Connection
-    const socket = io(backendUrl);
+    if (!socket || !doctor || !selectedDate) return;
 
-    // Join a specific room for this doctor/date (mock setup based on backend architecture)
-    const room = doctor ? `${doctor._id}_${selectedDate}` : 'general_room';
+    // Join a specific room for this doctor/date
+    const room = `queue_${doctor._id}_${selectedDate}`;
     socket.emit('join_queue', room);
 
-    // 2. Listen for real-time updates
-    socket.on('queue_update', (data) => {
-      /* Expected data format from backend:
-         { message: 'Queue advanced', pendingCount: number }
-      */
+    // Listen for real-time updates
+    const handleQueueUpdate = (data) => {
       if (data.pendingCount !== undefined) {
-        // Logic to calculate how many are ahead based on backend count
-        // For this UI demo, we'll just simulate the decrementing if no real data comes
-      }
-    });
-
-    // 3. Simulation interval (to demonstrate the real-time UI changing without refresh)
-    // This mocks socket events arriving over time
-    let ahead = 4;
-    let wait = 45;
-    let current = 12;
-
-    const timer = setInterval(() => {
-      if (ahead > 0) {
-        ahead -= 1;
-        wait -= 10;
-        current += 1;
+        // Calculate the difference or position
+        // In a real app, 'yourNumber' and the 'pendingCount' math would be exact based on queue ID
+        // For this real-time implementation, we'll sync patientsAhead directly to pendingCount 
+        // to show live movement when the doctor clicks 'Complete'
+        setPatientsAhead(data.pendingCount);
         
-        setPatientsAhead(ahead);
-        setEstimatedWait(Math.max(0, wait));
-        setCurrentPatient(current);
+        // Update estimated wait dynamically
+        setEstimatedWait(data.pendingCount * 10);
+        
+        // Move current patient forward
+        setCurrentPatient(prev => prev + 1);
 
-        if (ahead === 1) {
+        if (data.pendingCount === 1) {
           setStatus('Your Turn Soon');
+        } else if (data.pendingCount === 0) {
+          setStatus('Please Proceed to Consultation Room');
         } else {
           setStatus('Waiting');
         }
-      } else {
-        setStatus('Please Proceed to Consultation Room');
-        clearInterval(timer);
       }
-    }, 5000); // Update every 5 seconds for demo purposes
+    };
+
+    socket.on('queue_update', handleQueueUpdate);
 
     return () => {
-      clearInterval(timer);
-      socket.disconnect();
+      socket.off('queue_update', handleQueueUpdate);
     };
-  }, [backendUrl, doctor, selectedDate]);
+  }, [socket, doctor, selectedDate]);
 
   // Fallback for missing state
   if (!doctor) {

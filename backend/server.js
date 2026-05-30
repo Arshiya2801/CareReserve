@@ -8,6 +8,10 @@ import userRoutes from './routes/userRoute.js';
 import doctorRoutes from './routes/doctorRoute.js';
 import appointmentRoutes from './routes/appointmentRoute.js';
 import paymentRoutes from './routes/paymentRoute.js';
+import notificationRoutes from './routes/notificationRoute.js';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
+import rateLimit from 'express-rate-limit';
 
 // Load env vars
 dotenv.config();
@@ -45,11 +49,29 @@ io.on('connection', (socket) => {
   });
 });
 
-// Body parser
+// Basic middleware
 app.use(express.json());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173', // Restrict in production
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 
-// Enable CORS
-app.use(cors());
+// Security middleware
+app.use(helmet());
+app.use(mongoSanitize());
+
+// Rate Limiting
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again after 15 minutes',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply rate limiter to all API requests
+app.use('/api/', apiLimiter);
 
 // Serve static files (images)
 app.use('/images', express.static('public/images'));
@@ -58,6 +80,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');

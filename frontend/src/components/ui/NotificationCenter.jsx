@@ -1,19 +1,37 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 const mockNotifications = [
-  { id: 1, type: 'alert', title: 'Appointment Reminder', message: 'Your appointment with Dr. Richard James is in 2 hours.', time: '10 mins ago', read: false },
-  { id: 2, type: 'queue', title: 'Queue Position Updated', message: 'You are now #3 in line. Estimated wait: 15 mins.', time: '1 hour ago', read: false },
-  { id: 3, type: 'success', title: 'Payment Success', message: 'Payment of $150 was successful for your upcoming visit.', time: '2 hours ago', read: true },
-  { id: 4, type: 'info', title: 'Appointment Booked', message: 'Your booking for Friday, Oct 24 has been confirmed.', time: '1 day ago', read: true },
-  { id: 5, type: 'success', title: 'Consultation Completed', message: 'Dr. Sarah Smith has completed your consultation. View prescription.', time: '2 days ago', read: true },
-  { id: 6, type: 'success', title: 'Appointment Accepted', message: 'Dr. Davis has accepted your reschedule request.', time: '3 days ago', read: true },
-  { id: 7, type: 'error', title: 'Appointment Rejected', message: 'Dr. Brown is unavailable at the requested time.', time: '1 week ago', read: true },
-];
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { AppContext } from '../../context/AppContext';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const NotificationCenter = ({ onClose }) => {
-  const [notifications, setNotifications] = useState(mockNotifications);
-  const [activeTab, setActiveTab] = useState('All');
+  const { backendUrl, token, socket } = useContext(AppContext);
+  const [notifications, setNotifications] = useState([]);
+  const [activeTab, setActiveTab] = useState('all');
   const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    fetchNotifications();
+    
+    if (socket) {
+      socket.on('notification-created', (newNotif) => {
+        setNotifications((prev) => [newNotif, ...prev]);
+        toast.info(newNotif.title);
+      });
+    }
+    return () => socket?.off('notification-created');
+  }, [socket]);
+
+  const fetchNotifications = async () => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/notifications`, { headers: { Authorization: `Bearer ${token}` } });
+      if (data.success) setNotifications(data.notifications);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // Close dropdown if clicked outside
   useEffect(() => {
@@ -26,18 +44,22 @@ const NotificationCenter = ({ onClose }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
 
-  const markAsRead = (id) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  const markAsRead = async (id) => {
+    try {
+      await axios.put(`${backendUrl}/api/notifications/${id}/read`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
+    } catch (error) {
+      toast.error('Failed to mark as read');
+    }
   };
 
-  const deleteNotification = (id, e) => {
-    e.stopPropagation();
-    setNotifications(prev => prev.filter(n => n.id !== id));
+  const deleteNotification = async (id) => {
+    // We didn't create delete endpoint, so just remove from UI for now
+    setNotifications(prev => prev.filter(n => n._id !== id));
   };
 
   const getFiltered = () => {
-    if (activeTab === 'Unread') return notifications.filter(n => !n.read);
-    if (activeTab === 'Alerts') return notifications.filter(n => n.type === 'alert' || n.type === 'queue');
+    if (activeTab === 'unread') return notifications.filter(n => !n.read);
     return notifications;
   };
 
@@ -51,7 +73,7 @@ const NotificationCenter = ({ onClose }) => {
     }
   };
 
-  const filtered = getFiltered();
+  const filteredNotifications = getFiltered();
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
@@ -59,7 +81,6 @@ const NotificationCenter = ({ onClose }) => {
       ref={dropdownRef}
       className="absolute top-16 right-4 sm:right-10 w-full sm:w-96 max-h-[80vh] flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-800 z-50 overflow-hidden"
     >
-      {/* Header */}
       <div className="p-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50 dark:bg-slate-900/50">
         <div>
           <h3 className="font-bold text-lg text-gray-900 dark:text-white">Notifications</h3>
@@ -70,13 +91,12 @@ const NotificationCenter = ({ onClose }) => {
         </button>
       </div>
 
-      {/* Tabs */}
       <div className="flex border-b border-gray-100 dark:border-slate-800">
-        {['All', 'Unread', 'Alerts'].map(tab => (
+        {['all', 'unread'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-3 text-sm font-semibold transition-colors ${
+            className={`flex-1 py-3 text-sm font-semibold capitalize transition-colors ${
               activeTab === tab 
                 ? 'text-primary border-b-2 border-primary' 
                 : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
@@ -87,49 +107,47 @@ const NotificationCenter = ({ onClose }) => {
         ))}
       </div>
 
-      {/* List */}
       <div className="flex-1 overflow-y-auto min-h-[300px]">
-        {filtered.length === 0 ? (
+        {filteredNotifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-400 p-8">
             <span className="text-4xl mb-2">📭</span>
             <p className="font-medium">No notifications here</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-50 dark:divide-slate-800/50">
-            {filtered.map(notification => (
+            {filteredNotifications.map((notif) => (
               <div 
-                key={notification.id} 
-                onClick={() => markAsRead(notification.id)}
-                className={`p-4 flex gap-4 cursor-pointer group transition-colors ${
-                  notification.read ? 'hover:bg-gray-50 dark:hover:bg-slate-800/50 opacity-75' : 'bg-primary/5 hover:bg-primary/10'
-                }`}
+                key={notif._id} 
+                className={`p-4 border-b border-gray-100 dark:border-slate-700/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors group ${!notif.read ? 'bg-primary/5 dark:bg-primary/10' : ''}`}
               >
-                {getIcon(notification.type)}
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start mb-1">
-                    <p className={`text-sm font-bold truncate pr-4 ${notification.read ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-white'}`}>
-                      {notification.title}
-                    </p>
-                    <span className="text-[10px] whitespace-nowrap text-gray-400 font-medium">
-                      {notification.time}
-                    </span>
+                <div className="flex gap-4">
+                  <div className="mt-1">
+                    {getIcon(notif.type)}
                   </div>
-                  <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
-                    {notification.message}
-                  </p>
-                </div>
-                
-                {/* Actions (Hover) */}
-                <div className="flex flex-col items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity pl-2">
-                  {!notification.read && <div className="w-2 h-2 rounded-full bg-primary mt-1"></div>}
-                  <button 
-                    onClick={(e) => deleteNotification(notification.id, e)}
-                    className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded"
-                    title="Delete"
-                  >
-                    🗑️
-                  </button>
+                  <div className="flex-1 space-y-1">
+                    <div className="flex justify-between items-start">
+                      <h4 className={`text-sm font-bold ${!notif.read ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                        {notif.title}
+                      </h4>
+                      <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                        {new Date(notif.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </span>
+                    </div>
+                    <p className={`text-sm ${!notif.read ? 'text-gray-800 dark:text-gray-200 font-medium' : 'text-gray-500 dark:text-gray-400'}`}>
+                      {notif.message}
+                    </p>
+                    
+                    <div className="flex gap-3 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {!notif.read && (
+                        <button onClick={() => markAsRead(notif._id)} className="text-xs font-bold text-primary hover:text-primary-dark">
+                          Mark as read
+                        </button>
+                      )}
+                      <button onClick={() => deleteNotification(notif._id)} className="text-xs font-bold text-red-500 hover:text-red-700">
+                        Delete
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -137,7 +155,6 @@ const NotificationCenter = ({ onClose }) => {
         )}
       </div>
 
-      {/* Footer */}
       <div className="p-3 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 text-center">
         <button 
           onClick={() => setNotifications(prev => prev.map(n => ({...n, read: true})))}
