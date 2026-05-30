@@ -147,4 +147,60 @@ const cancelAppointment = async (req, res) => {
   }
 };
 
-export { bookAppointment, myAppointments, completeAppointment, cancelAppointment };
+// @desc    Reschedule an appointment
+// @route   PUT /api/appointments/reschedule/:id
+// @access  Private
+const rescheduleAppointment = async (req, res) => {
+  try {
+    const appointmentId = req.params.id;
+    const { slotDate, slotTime } = req.body;
+    
+    const appointment = await Appointment.findById(appointmentId);
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+
+    // Verify user owns the appointment
+    if (appointment.userId.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: 'User not authorized' });
+    }
+
+    const docData = await Doctor.findById(appointment.docId);
+    
+    // 1. Free up the old slot
+    if (docData.slots_booked && docData.slots_booked[appointment.slotDate]) {
+      docData.slots_booked[appointment.slotDate] = docData.slots_booked[appointment.slotDate].filter(
+        time => time !== appointment.slotTime
+      );
+    }
+
+    // 2. Book the new slot
+    let slots_booked = docData.slots_booked || {};
+    if (slots_booked[slotDate]) {
+      if (slots_booked[slotDate].includes(slotTime)) {
+        return res.status(400).json({ message: 'New slot is already booked' });
+      } else {
+        slots_booked[slotDate].push(slotTime);
+      }
+    } else {
+      slots_booked[slotDate] = [];
+      slots_booked[slotDate].push(slotTime);
+    }
+
+    // Save doctor's new slots
+    await Doctor.findByIdAndUpdate(appointment.docId, { slots_booked });
+
+    // 3. Update appointment
+    appointment.slotDate = slotDate;
+    appointment.slotTime = slotTime;
+    appointment.cancelled = false; // in case they are rescheduling a cancelled one
+    await appointment.save();
+
+    res.json({ success: true, message: 'Appointment rescheduled successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export { bookAppointment, myAppointments, completeAppointment, cancelAppointment, rescheduleAppointment };

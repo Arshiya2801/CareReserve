@@ -5,7 +5,19 @@ import Doctor from '../models/doctorModel.js';
 // @access  Public
 const getDoctors = async (req, res) => {
   try {
-    const doctors = await Doctor.find({});
+    const { search, speciality } = req.query;
+    
+    // Build query object
+    let query = {};
+    if (speciality) {
+      query.speciality = { $regex: new RegExp(speciality, 'i') }; // Case-insensitive exact/partial match
+    }
+    if (search) {
+      // Search by name
+      query.name = { $regex: new RegExp(search, 'i') };
+    }
+
+    const doctors = await Doctor.find(query);
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:4000';
     const docsWithImages = doctors.map(doc => {
       const docObj = doc.toObject();
@@ -33,4 +45,24 @@ const addDoctor = async (req, res) => {
   }
 };
 
-export { getDoctors, addDoctor };
+// @desc    Get doctor by ID
+// @route   GET /api/doctors/:id
+// @access  Public
+const getDoctorById = async (req, res) => {
+  try {
+    const doctor = await Doctor.findById(req.params.id);
+    if (!doctor) {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+    
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:4000';
+    const docObj = doctor.toObject();
+    docObj.image = docObj.image ? `${backendUrl}/images/${docObj.image}` : '';
+    
+    res.json(docObj);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export { getDoctors, addDoctor, getDoctorById };

@@ -88,4 +88,13 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser, getUserProfile };
+// @desc    Logout user
+// @route   POST /api/users/logout
+// @access  Public
+const logoutUser = (req, res) => {
+  // In a token-based (stateless JWT) approach, logout is typically handled client-side 
+  // by discarding the token. This endpoint serves as a formal completion or to clear cookies if they were used.
+  res.json({ message: 'User logged out successfully' });
+};
+
+export { registerUser, loginUser, getUserProfile, logoutUser };
