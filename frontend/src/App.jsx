@@ -14,6 +14,8 @@ import PatientDashboard from './pages/patient/PatientDashboard'
 import DoctorDashboard from './pages/doctor/DoctorDashboard'
 import DoctorProfile from './pages/DoctorProfile'
 import BookingFlow from './pages/BookingFlow'
+import Payment from './pages/Payment'
+import AppointmentConfirmation from './pages/AppointmentConfirmation'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -39,6 +41,8 @@ const App = () => {
         <Route path='/my-appointments' element={<ProtectedRoute allowedRoles={['patient']}><MyAppointments/></ProtectedRoute>} />
         <Route path='/my-profile' element={<ProtectedRoute allowedRoles={['patient', 'doctor']}><MyProfile/></ProtectedRoute>} />
         <Route path='/book/:docId' element={<ProtectedRoute allowedRoles={['patient']}><BookingFlow/></ProtectedRoute>} />
+        <Route path='/payment' element={<ProtectedRoute allowedRoles={['patient']}><Payment/></ProtectedRoute>} />
+        <Route path='/confirmation' element={<ProtectedRoute allowedRoles={['patient']}><AppointmentConfirmation/></ProtectedRoute>} />
         
         {/* Legacy route redirect */}
         <Route path='/appointment/:docId' element={<Navigate to="/doctors" replace />} />

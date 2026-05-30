@@ -35,32 +35,15 @@ const BookingFlow = () => {
       return;
     }
 
-    setIsBooking(true);
-    try {
-      let day = selectedDate.getDate();
-      let month = selectedDate.getMonth() + 1;
-      let year = selectedDate.getFullYear();
-      const slotDate = `${day}_${month}_${year}`;
-
-      const { data } = await axios.post(
-        backendUrl + '/api/appointments/book',
-        { docId, slotDate, slotTime: selectedTime },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (data.success) {
-        toast.success("Appointment booked successfully!");
-        getDoctorsData(); 
-        navigate('/my-appointments');
-      } else {
-        toast.error(data.message);
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.response?.data?.message || error.message);
-    } finally {
-      setIsBooking(false);
-    }
+    // Intercept API call and redirect to dedicated Payment Page
+    navigate('/payment', { 
+      state: { 
+        docId: docInfo._id, 
+        selectedDate, 
+        selectedTime,
+        doctor: docInfo 
+      } 
+    });
   };
 
   if (!docInfo) {
