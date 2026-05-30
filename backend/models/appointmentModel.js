@@ -36,18 +36,12 @@ const appointmentSchema = new mongoose.Schema(
       type: Number,
       required: true
     },
-    cancelled: {
-      type: Boolean,
-      default: false
-    },
-    payment: {
-      type: Boolean,
-      default: false
-    },
-    isCompleted: {
-      type: Boolean,
-      default: false
-    }
+    cancelled: { type: Boolean, default: false },
+    isCompleted: { type: Boolean, default: false },
+    paymentStatus: { type: String, enum: ['Pending', 'Completed', 'Failed'], default: 'Pending' },
+    razorpayOrderId: { type: String, default: '' },
+    razorpayPaymentId: { type: String, default: '' },
+    receiptUrl: { type: String, default: '' }
   },
   {
     timestamps: true,
