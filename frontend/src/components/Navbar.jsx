@@ -2,11 +2,15 @@ import React, { useContext, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { assets } from '../assets/assets';
 import { AppContext } from '../context/AppContext';
+import NotificationCenter from './ui/NotificationCenter';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const { token, setToken } = useContext(AppContext);
+  // For demo: Mock unread count, normally pulled from global state
+  const unreadCount = 2;
 
   const navLinks = [
     { name: 'HOME', path: '/' },
@@ -45,11 +49,27 @@ const Navbar = () => {
           ))}
         </ul>
 
-        {/* Profile / Create Account / Hamburger */}
+        {/* Profile / Create Account / Notifications / Hamburger */}
         <div className="flex items-center gap-4">
           {token ? (
-            <div className="relative group cursor-pointer">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
+              {/* Notification Bell */}
+              <div className="relative">
+                <button 
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="p-2 text-gray-600 hover:text-primary transition bg-gray-50 hover:bg-primary/10 rounded-full"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                </button>
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                )}
+                {showNotifications && <NotificationCenter onClose={() => setShowNotifications(false)} />}
+              </div>
+
+              {/* Profile Dropdown */}
+              <div className="relative group cursor-pointer">
+                <div className="flex items-center gap-2">
                 <img
                   src={assets.profile_pic}
                   alt="User profile"
