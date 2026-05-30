@@ -5,6 +5,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { io } from 'socket.io-client';
 import Button from '../components/ui/Button';
+import Modal from '../components/ui/Modal';
+import AppointmentTimeline from '../components/ui/AppointmentTimeline';
 
 const MyAppointments = () => {
   const { backendUrl, token } = useContext(AppContext);
@@ -13,6 +15,8 @@ const MyAppointments = () => {
   const [socket, setSocket] = useState(null);
   const [queueInfo, setQueueInfo] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isTimelineModalOpen, setIsTimelineModalOpen] = useState(false);
+  const [selectedTimelineApp, setSelectedTimelineApp] = useState(null);
 
   // Dashboard State
   const [activeTab, setActiveTab] = useState('upcoming');
@@ -160,7 +164,6 @@ const MyAppointments = () => {
             }`}
           >
             {tab}
-            {/* Show counts logic can go here if needed */}
           </button>
         ))}
       </div>
@@ -237,36 +240,56 @@ const MyAppointments = () => {
                     </Button>
                     
                     {activeTab === 'upcoming' && (
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 gap-2">
                         <Button 
-                          variant="secondary" 
-                          onClick={() => handleCancel(item._id)}
-                          className="bg-red-50 text-red-600 border-red-100 hover:bg-red-500 hover:text-white dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30 dark:hover:bg-red-600 dark:hover:text-white"
+                          variant="outline" 
+                          onClick={() => { setSelectedTimelineApp(item); setIsTimelineModalOpen(true); }}
                         >
-                          Cancel
+                          View Timeline
                         </Button>
-                        <Button 
-                          variant="outline"
-                          onClick={() => {
-                            if(window.confirm("Do you want to reschedule this appointment? You will be taken to the booking page.")){
-                              axios.put(backendUrl + `/api/appointments/cancel/${item._id}`, {}, { headers: { Authorization: `Bearer ${token}` } }).then(() => {
-                                navigate(`/book/${item.docData._id}`);
-                              });
-                            }
-                          }}
-                        >
-                          Reschedule
-                        </Button>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button 
+                            variant="secondary" 
+                            onClick={() => handleCancel(item._id)}
+                            className="bg-red-50 text-red-600 border-red-100 hover:bg-red-500 hover:text-white dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30 dark:hover:bg-red-600 dark:hover:text-white"
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            variant="outline"
+                            onClick={() => {
+                              if(window.confirm("Do you want to reschedule this appointment? You will be taken to the booking page.")){
+                                axios.put(backendUrl + `/api/appointments/cancel/${item._id}`, {}, { headers: { Authorization: `Bearer ${token}` } }).then(() => {
+                                  navigate(`/book/${item.docData._id}`);
+                                });
+                              }
+                            }}
+                          >
+                            Reschedule
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>
-
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      <Modal 
+        isOpen={isTimelineModalOpen} 
+        onClose={() => setIsTimelineModalOpen(false)} 
+        title="Appointment Timeline"
+      >
+        {selectedTimelineApp && (
+          <AppointmentTimeline 
+            currentStageId={selectedTimelineApp.isCompleted ? 6 : (selectedTimelineApp.cancelled ? 0 : 3)} 
+            appointmentDate={selectedTimelineApp.slotDate} 
+          />
+        )}
+      </Modal>
 
     </div>
   );

@@ -24,10 +24,19 @@ app.set('io', io);
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
   
-  socket.on('join_queue', ({ docId, date }) => {
-    const room = `${docId}_${date}`;
+  socket.on('join_queue', (room) => {
     socket.join(room);
-    console.log(`Socket ${socket.id} joined room: ${room}`);
+    console.log(`Socket ${socket.id} joined queue room: ${room}`);
+  });
+
+  socket.on('join_user_room', (userId) => {
+    socket.join(`user_${userId}`);
+    console.log(`Socket ${socket.id} joined user room: user_${userId}`);
+  });
+
+  socket.on('join_doctor_room', (docId) => {
+    socket.join(`doctor_${docId}`);
+    console.log(`Socket ${socket.id} joined doctor room: doctor_${docId}`);
   });
 
   socket.on('disconnect', () => {

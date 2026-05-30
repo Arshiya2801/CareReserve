@@ -52,7 +52,16 @@ const bookAppointment = async (req, res) => {
 
     await Doctor.findByIdAndUpdate(docId, { slots_booked });
 
-    res.status(201).json({ message: 'Appointment booked successfully' });
+    // Emit Socket.io Event to the Doctor
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`doctor_${docId}`).emit('appointment-booked', {
+        message: `New appointment booked by ${userData.name}`,
+        appointmentId: appointment._id
+      });
+    }
+
+    res.status(201).json({ success: true, message: 'Appointment booked successfully' });
 
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -139,6 +148,15 @@ const cancelAppointment = async (req, res) => {
         time => time !== appointment.slotTime
       );
       await Doctor.findByIdAndUpdate(appointment.docId, { slots_booked: docData.slots_booked });
+    }
+
+    // Emit Socket.io Event
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`doctor_${appointment.docId}`).emit('appointment-rejected', {
+        message: 'An appointment has been cancelled',
+        appointmentId
+      });
     }
 
     res.json({ success: true, message: 'Appointment cancelled successfully' });
