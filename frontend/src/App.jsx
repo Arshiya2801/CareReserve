@@ -13,6 +13,7 @@ import DesignSystem from './pages/DesignSystem'
 import PatientDashboard from './pages/patient/PatientDashboard'
 import DoctorDashboard from './pages/doctor/DoctorDashboard'
 import DoctorProfile from './pages/DoctorProfile'
+import BookingFlow from './pages/BookingFlow'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -37,6 +38,8 @@ const App = () => {
         <Route path='/patient/dashboard' element={<ProtectedRoute allowedRoles={['patient']}><PatientDashboard/></ProtectedRoute>} />
         <Route path='/my-appointments' element={<ProtectedRoute allowedRoles={['patient']}><MyAppointments/></ProtectedRoute>} />
         <Route path='/my-profile' element={<ProtectedRoute allowedRoles={['patient', 'doctor']}><MyProfile/></ProtectedRoute>} />
+        <Route path='/book/:docId' element={<ProtectedRoute allowedRoles={['patient']}><BookingFlow/></ProtectedRoute>} />
+        
         {/* Legacy route redirect */}
         <Route path='/appointment/:docId' element={<Navigate to="/doctors" replace />} />
 
