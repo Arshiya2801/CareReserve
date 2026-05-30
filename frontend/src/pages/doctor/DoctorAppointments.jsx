@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from 'react';
-import Sidebar from '../../components/ui/Sidebar';
 import { Card, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { toast } from 'react-toastify';
@@ -101,72 +100,71 @@ const DoctorAppointments = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
-      <Sidebar role="doctor" />
+    <div className="max-w-6xl mx-auto space-y-6">
       
-      <main className="flex-1 p-8">
-        <div className="max-w-6xl mx-auto space-y-6">
-          
-          <div className="flex justify-between items-end">
-            <div>
-              <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Appointment Management</h1>
-              <p className="text-gray-500 mt-2">Manage your daily workflow and patient statuses.</p>
-            </div>
-            <div className="bg-primary/10 text-primary px-4 py-2 rounded-lg font-bold">
-              Today: {new Date().toLocaleDateString()}
-            </div>
-          </div>
-
-          {/* Appointments Pipeline view */}
-          <Card className="border-none shadow-sm bg-white dark:bg-surface-dark overflow-hidden">
-            <div className="bg-gray-50 dark:bg-slate-800/50 p-4 border-b border-gray-100 dark:border-slate-700">
-              <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span>📋</span> Today's Queue
-              </h3>
-            </div>
-            
-            <div className="divide-y divide-gray-100 dark:divide-slate-700">
-              {appointments.map((app) => (
-                <div key={app._id} className="p-6 flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                  
-                  {/* Patient Info */}
-                  <div className="flex items-center gap-4 flex-1">
-                    <img src={app.userData.image || 'https://via.placeholder.com/150'} alt={app.userData.name} className="w-16 h-16 rounded-full object-cover shadow-sm" />
-                    <div>
-                      <h4 className="font-bold text-lg text-gray-900 dark:text-white">{app.userData.name}</h4>
-                      <p className="text-sm text-gray-500 font-medium">Slot: {app.slotDate}</p>
-                    </div>
-                  </div>
-
-                  {/* Time & Status */}
-                  <div className="flex items-center gap-8 flex-1 justify-center">
-                    <div className="text-center">
-                      <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Time</p>
-                      <p className="font-bold text-gray-900 dark:text-white text-lg">{app.slotTime}</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Status</p>
-                      {getStatusBadge(app.status)}
-                    </div>
-                  </div>
-
-                  {/* Context Actions */}
-                  <div className="flex-1 flex justify-end">
-                    {renderActionButtons(app)}
-                  </div>
-
-                </div>
-              ))}
-            </div>
-            {appointments.length === 0 && (
-              <div className="p-12 text-center text-gray-500">
-                No appointments scheduled for today.
-              </div>
-            )}
-          </Card>
-
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Appointment Management</h1>
+          <p className="text-gray-500 mt-2">Manage your daily workflow and patient statuses.</p>
         </div>
-      </main>
+        <div className="bg-primary/10 text-primary px-4 py-2 rounded-lg font-bold">
+          Today: {new Date().toLocaleDateString()}
+        </div>
+      </div>
+
+      {/* Appointments Pipeline view */}
+      <Card className="border-none shadow-sm bg-white dark:bg-surface-dark overflow-hidden">
+        <div className="bg-gray-50 dark:bg-slate-800/50 p-4 border-b border-gray-100 dark:border-slate-700">
+          <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <span>📋</span> Today's Queue
+          </h3>
+        </div>
+        
+        <div className="divide-y divide-gray-100 dark:divide-slate-700">
+          {appointments.map((app) => (
+            <div key={app._id} className="p-6 flex flex-col md:flex-row items-center justify-between gap-6 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors">
+              
+              {/* Patient Info */}
+              <div className="flex items-center gap-4 flex-1">
+                <img 
+                  src={app.userData.image || 'https://via.placeholder.com/150'} 
+                  alt={app.userData.name} 
+                  onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/150'; }}
+                  className="w-16 h-16 rounded-full object-cover shadow-sm" 
+                />
+                <div>
+                  <h4 className="font-bold text-lg text-gray-900 dark:text-white">{app.userData.name}</h4>
+                  <p className="text-sm text-gray-500 font-medium">Slot: {app.slotDate}</p>
+                </div>
+              </div>
+
+              {/* Time & Status */}
+              <div className="flex items-center gap-8 flex-1 justify-center">
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Time</p>
+                  <p className="font-bold text-gray-900 dark:text-white text-lg">{app.slotTime}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Status</p>
+                  {getStatusBadge(app.status)}
+                </div>
+              </div>
+
+              {/* Context Actions */}
+              <div className="flex-1 flex justify-end">
+                {renderActionButtons(app)}
+              </div>
+
+            </div>
+          ))}
+        </div>
+        {appointments.length === 0 && (
+          <div className="p-12 text-center text-gray-500">
+            No appointments scheduled for today.
+          </div>
+        )}
+      </Card>
+
     </div>
   );
 };

@@ -210,7 +210,12 @@ const MyAppointments = () => {
                 <div className="p-5 flex-1">
                   {/* Doctor Info */}
                   <div className="flex gap-4 items-start mb-5">
-                    <img src={item.docData.image} alt={item.docData.name} className="w-16 h-16 rounded-xl object-cover bg-white dark:bg-slate-700 shadow-sm" />
+                    <img 
+                      src={item.docData.image || 'https://via.placeholder.com/150'} 
+                      alt={item.docData.name} 
+                      onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/150'; }}
+                      className="w-16 h-16 rounded-xl object-cover bg-white dark:bg-slate-700 shadow-sm" 
+                    />
                     <div>
                       <h3 className="font-bold text-gray-900 dark:text-white">{item.docData.name}</h3>
                       <p className="text-xs text-primary font-semibold">{item.docData.speciality}</p>
