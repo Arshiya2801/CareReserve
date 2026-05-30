@@ -15,6 +15,9 @@ import BookingFlow from './pages/BookingFlow'
 import Payment from './pages/Payment'
 import AppointmentConfirmation from './pages/AppointmentConfirmation'
 import QueueTracking from './pages/QueueTracking'
+import PatientQueueTracking from './pages/patient/PatientQueueTracking'
+import AppointmentHistory from './pages/patient/AppointmentHistory'
+import Notifications from './pages/patient/Notifications'
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicLayout from './components/layouts/PublicLayout'
 import PatientLayout from './components/layouts/PatientLayout'
@@ -37,6 +40,10 @@ const App = () => {
       {/* Protected Patient Routes (PatientLayout) */}
       <Route element={<ProtectedRoute allowedRoles={['patient']}><PatientLayout/></ProtectedRoute>}>
         <Route path='/patient/dashboard' element={<PatientDashboard/>} />
+        <Route path='/patient/book-appointment' element={<Doctors/>} />
+        <Route path='/patient/appointment-history' element={<AppointmentHistory/>} />
+        <Route path='/patient/queue-tracking' element={<PatientQueueTracking/>} />
+        <Route path='/patient/notifications' element={<Notifications/>} />
         <Route path='/my-appointments' element={<MyAppointments/>} />
         <Route path='/my-profile' element={<MyProfile/>} />
         <Route path='/book/:docId' element={<BookingFlow/>} />

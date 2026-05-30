@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import { io } from 'socket.io-client';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
-import AppointmentTimeline from '../components/ui/AppointmentTimeline';
+import AppointmentCalendar from '../components/ui/AppointmentCalendar';
 
 const MyAppointments = () => {
   const { backendUrl, token } = useContext(AppContext);
@@ -15,8 +15,11 @@ const MyAppointments = () => {
   const [socket, setSocket] = useState(null);
   const [queueInfo, setQueueInfo] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  const [isTimelineModalOpen, setIsTimelineModalOpen] = useState(false);
-  const [selectedTimelineApp, setSelectedTimelineApp] = useState(null);
+  const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+  const [rescheduleApp, setRescheduleApp] = useState(null);
+  const [newDate, setNewDate] = useState(new Date());
+  const [newTime, setNewTime] = useState('');
+  const [isRescheduling, setIsRescheduling] = useState(false);
 
   // Dashboard State
   const [activeTab, setActiveTab] = useState('upcoming');
@@ -61,6 +64,38 @@ const MyAppointments = () => {
     }
   }, [appointments, backendUrl]);
 
+  const handleRescheduleSubmit = async () => {
+    if (!newDate || !newTime) {
+      toast.error("Please select a new date and time");
+      return;
+    }
+    setIsRescheduling(true);
+    try {
+      let day = newDate.getDate();
+      let month = newDate.getMonth() + 1;
+      let year = newDate.getFullYear();
+      const slotDate = `${day}_${month}_${year}`;
+
+      const { data } = await axios.put(backendUrl + `/api/appointments/reschedule/${rescheduleApp._id}`, {
+        slotDate,
+        slotTime: newTime
+      }, { headers: { Authorization: `Bearer ${token}` } });
+
+      if (data.success) {
+        toast.success("Appointment rescheduled successfully!");
+        setIsRescheduleModalOpen(false);
+        getUserAppointments();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Error rescheduling appointment");
+    } finally {
+      setIsRescheduling(false);
+    }
+  };
+
   // API Actions
   const handleCancel = async (appId) => {
     if (!window.confirm("Are you sure you want to cancel this appointment?")) return;
@@ -78,25 +113,18 @@ const MyAppointments = () => {
     }
   };
 
-  // Filter Logic
+  // Filter Logic - Only Upcoming for this page
   const filteredAppointments = appointments.filter((item) => {
-    // 1. Filter by Tab
-    if (activeTab === 'upcoming') {
-      if (item.cancelled || item.isCompleted) return false;
-    } else if (activeTab === 'completed') {
-      if (!item.isCompleted) return false;
-    } else if (activeTab === 'cancelled') {
-      if (!item.cancelled) return false;
-    }
+    // Only Upcoming
+    if (item.cancelled || item.isCompleted) return false;
 
-    // 2. Filter by Search (Doctor Name or Speciality)
+    // Search by name or speciality
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       const matchName = item.docData.name.toLowerCase().includes(term);
       const matchSpec = item.docData.speciality.toLowerCase().includes(term);
       if (!matchName && !matchSpec) return false;
     }
-
     return true;
   });
 
@@ -151,22 +179,7 @@ const MyAppointments = () => {
         </div>
       )}
 
-      {/* TABS */}
-      <div className="flex gap-2 overflow-x-auto pb-4 mb-2 border-b border-gray-200 dark:border-slate-700 hide-scrollbar">
-        {['upcoming', 'completed', 'cancelled'].map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-5 py-2.5 rounded-t-xl text-sm font-bold capitalize transition-all duration-200 ${
-              activeTab === tab 
-                ? 'bg-white dark:bg-surface-dark text-primary border-t border-l border-r border-gray-200 dark:border-slate-700 -mb-[1px] z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]' 
-                : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800/50'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
+      {/* TABS - Removed since we have a dedicated history page now. Only Upcoming displayed here. */}
 
       {/* MAIN CONTENT / CARDS */}
       <div className="bg-white dark:bg-surface-dark border border-gray-200 dark:border-slate-700 rounded-b-2xl rounded-tr-2xl p-6 min-h-[400px]">
@@ -244,37 +257,26 @@ const MyAppointments = () => {
                       View Details
                     </Button>
                     
-                    {activeTab === 'upcoming' && (
-                      <div className="grid grid-cols-1 gap-2">
-                        <Button 
-                          variant="outline" 
-                          onClick={() => { setSelectedTimelineApp(item); setIsTimelineModalOpen(true); }}
-                        >
-                          View Timeline
-                        </Button>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Button 
-                            variant="secondary" 
-                            onClick={() => handleCancel(item._id)}
-                            className="bg-red-50 text-red-600 border-red-100 hover:bg-red-500 hover:text-white dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30 dark:hover:bg-red-600 dark:hover:text-white"
-                          >
-                            Cancel
-                          </Button>
-                          <Button 
-                            variant="outline"
-                            onClick={() => {
-                              if(window.confirm("Do you want to reschedule this appointment? You will be taken to the booking page.")){
-                                axios.put(backendUrl + `/api/appointments/cancel/${item._id}`, {}, { headers: { Authorization: `Bearer ${token}` } }).then(() => {
-                                  navigate(`/book/${item.docData._id}`);
-                                });
-                              }
-                            }}
-                          >
-                            Reschedule
-                          </Button>
-                        </div>
-                      </div>
-                    )}
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <Button 
+                        variant="secondary" 
+                        onClick={() => handleCancel(item._id)}
+                        className="bg-red-50 text-red-600 border-red-100 hover:bg-red-500 hover:text-white dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30 dark:hover:bg-red-600 dark:hover:text-white"
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        variant="primary"
+                        onClick={() => {
+                          setRescheduleApp(item);
+                          setNewDate(new Date());
+                          setNewTime('');
+                          setIsRescheduleModalOpen(true);
+                        }}
+                      >
+                        Reschedule
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -283,16 +285,34 @@ const MyAppointments = () => {
         )}
       </div>
 
+      {/* Reschedule Modal */}
       <Modal 
-        isOpen={isTimelineModalOpen} 
-        onClose={() => setIsTimelineModalOpen(false)} 
-        title="Appointment Timeline"
+        isOpen={isRescheduleModalOpen} 
+        onClose={() => setIsRescheduleModalOpen(false)} 
+        title="Reschedule Appointment"
       >
-        {selectedTimelineApp && (
-          <AppointmentTimeline 
-            currentStageId={selectedTimelineApp.isCompleted ? 6 : (selectedTimelineApp.cancelled ? 0 : 3)} 
-            appointmentDate={selectedTimelineApp.slotDate} 
-          />
+        {rescheduleApp && (
+          <div className="space-y-6">
+            <AppointmentCalendar 
+              doctor={rescheduleApp.docData}
+              selectedDate={newDate}
+              selectedTime={newTime}
+              onSelectDate={setNewDate}
+              onSelectTime={setNewTime}
+              isLoading={false}
+            />
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-700">
+              <Button variant="outline" onClick={() => setIsRescheduleModalOpen(false)}>Cancel</Button>
+              <Button 
+                variant="primary" 
+                onClick={handleRescheduleSubmit}
+                disabled={!newTime || isRescheduling}
+                isLoading={isRescheduling}
+              >
+                Confirm Reschedule
+              </Button>
+            </div>
+          </div>
         )}
       </Modal>
 

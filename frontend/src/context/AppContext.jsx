@@ -14,6 +14,16 @@ const AppContextProvider = (props) => {
     const [userData, setUserData] = useState(null);
     const [socket, setSocket] = useState(null);
 
+    const loadUserProfileData = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + '/api/users/profile', { headers: { Authorization: `Bearer ${token}` } });
+            setUserData(data);
+        } catch (error) {
+            console.log(error);
+            // toast.error(error.message); // Commented to avoid spamming if not logged in
+        }
+    };
+
     const getDoctorsData = async () => {
         try {
             const { data } = await axios.get(backendUrl + '/api/doctors');
@@ -27,6 +37,14 @@ const AppContextProvider = (props) => {
     useEffect(() => {
         getDoctorsData();
     }, []);
+
+    useEffect(() => {
+        if (token) {
+            loadUserProfileData();
+        } else {
+            setUserData(null);
+        }
+    }, [token]);
 
     // Setup Global Socket Connection when token is present
     useEffect(() => {
@@ -55,6 +73,7 @@ const AppContextProvider = (props) => {
         backendUrl,
         userData,
         setUserData,
+        loadUserProfileData,
         socket
     };
 

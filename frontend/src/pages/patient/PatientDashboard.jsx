@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import { AppContext } from '../../context/AppContext';
 
 const PatientDashboard = () => {
   const navigate = useNavigate();
+  const { userData } = useContext(AppContext);
 
   return (
     <div className="p-6 md:p-10">
@@ -12,12 +14,13 @@ const PatientDashboard = () => {
         
         <div className="flex flex-col md:flex-row justify-between md:items-end gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Patient Dashboard</h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-2">Welcome back! Manage your healthcare journey.</p>
+            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+              Hi, {userData?.name ? userData.name.split(' ')[0] : 'Patient'} 👋
+            </h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-2">Patient Dashboard - Manage your healthcare journey.</p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={() => navigate('/doctors')}>Find Doctor</Button>
-            <Button variant="primary" onClick={() => navigate('/doctors')}>Book Appointment</Button>
+            <Button variant="primary" onClick={() => navigate('/patient/book-appointment')}>Book Appointment</Button>
           </div>
         </div>
 
@@ -122,7 +125,7 @@ const PatientDashboard = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
                 
                 <button 
-                  onClick={() => navigate('/doctors')}
+                  onClick={() => navigate('/patient/book-appointment')}
                   className="flex flex-col items-center justify-center p-6 bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 hover:border-primary hover:shadow-md transition-all group"
                 >
                   <div className="w-12 h-12 bg-accent dark:bg-slate-700 rounded-full flex items-center justify-center text-primary group-hover:scale-110 transition-transform mb-3">
@@ -132,12 +135,13 @@ const PatientDashboard = () => {
                 </button>
                 
                 <button 
+                  onClick={() => navigate('/patient/appointment-history')}
                   className="flex flex-col items-center justify-center p-6 bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 hover:border-primary hover:shadow-md transition-all group"
                 >
                   <div className="w-12 h-12 bg-accent dark:bg-slate-700 rounded-full flex items-center justify-center text-primary group-hover:scale-110 transition-transform mb-3">
                     📁
                   </div>
-                  <span className="font-semibold text-gray-900 dark:text-white">Medical Records</span>
+                  <span className="font-semibold text-gray-900 dark:text-white">Appointment History</span>
                 </button>
                 
               </div>

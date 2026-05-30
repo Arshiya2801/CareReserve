@@ -16,10 +16,11 @@ const PatientLayout = () => {
 
   const navItems = [
     { label: 'Dashboard', path: '/patient/dashboard', icon: '🏠' },
-    { label: 'Book Appointment', path: '/doctors', icon: '🔍' },
+    { label: 'Book Appointment', path: '/patient/book-appointment', icon: '🔍' },
     { label: 'My Appointments', path: '/my-appointments', icon: '📅' },
-    { label: 'Queue Tracking', path: '/my-appointments', icon: '⏱️' }, // Can be combined or separate. I'll link to my-appointments where queue is shown.
-    { label: 'Notifications', path: '#', icon: '🔔' }, // We'll handle modal or page later
+    { label: 'Queue Tracking', path: '/patient/queue-tracking', icon: '⏱️' },
+    { label: 'Appointment History', path: '/patient/appointment-history', icon: '📁' },
+    { label: 'Notifications', path: '/patient/notifications', icon: '🔔' },
     { label: 'Profile', path: '/my-profile', icon: '👤' },
     { label: 'Settings', path: '/patient/settings', icon: '⚙️' },
   ];
