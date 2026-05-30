@@ -1,11 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Card, CardContent } from '../../components/ui/Card';
 import Sidebar from '../../components/ui/Sidebar';
 import Button from '../../components/ui/Button';
+import axios from 'axios';
+import { AppContext } from '../../context/AppContext';
+import { toast } from 'react-toastify';
 
 const DoctorDashboard = () => {
+  const { backendUrl, token } = useContext(AppContext);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [appointments, setAppointments] = useState([]);
+  
+  const fetchAppointments = async () => {
+    try {
+      const { data } = await axios.get(backendUrl + '/api/doctors/appointments', { headers: { Authorization: `Bearer ${token}` } });
+      if (data.success) {
+        setAppointments(data.appointments);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (token) fetchAppointments();
+  }, [token]);
 
   // Exact Sidebar Links Requested
   const navItems = [
@@ -18,17 +38,20 @@ const DoctorDashboard = () => {
     { label: 'Logout', path: '/login', icon: '🚪' },
   ];
 
-  // Mock Appointments Data for the Table
-  const mockAppointments = [
-    { id: 1, name: "Emily Chen", time: "10:00 AM", status: "Pending", history: "Asthma, Mild Hypertension", prevVisits: 2, phone: "+1 555-0198" },
-    { id: 2, name: "Michael Smith", time: "11:30 AM", status: "Accepted", history: "No major issues", prevVisits: 0, phone: "+1 555-0284" },
-    { id: 3, name: "Sarah Johnson", time: "01:00 PM", status: "Pending", history: "Type 2 Diabetes", prevVisits: 5, phone: "+1 555-0371" },
-    { id: 4, name: "David Wilson", time: "02:45 PM", status: "Completed", history: "Post-surgery checkup", prevVisits: 1, phone: "+1 555-0466" },
-  ];
-
-  // Table Action Handlers
-  const handleAction = (action, patientName) => {
-    alert(`${action} triggered for ${patientName}`);
+  const updateStatus = async (id, newStatus) => {
+    try {
+      const { data } = await axios.put(
+        backendUrl + '/api/doctors/appointment-status',
+        { appointmentId: id, status: newStatus },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (data.success) {
+        toast.success(`Status updated to: ${newStatus}`);
+        fetchAppointments();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+    }
   };
 
   return (
@@ -109,18 +132,18 @@ const DoctorDashboard = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white dark:bg-surface-dark divide-y divide-gray-100 dark:divide-slate-700">
-                    {mockAppointments.map((app) => (
-                      <tr key={app.id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+                    {appointments.map((app) => (
+                      <tr key={app._id} className="hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <button 
                             onClick={() => setSelectedPatient(app)}
                             className="font-bold text-primary hover:underline"
                           >
-                            {app.name}
+                            {app.userData.name}
                           </button>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">{app.time}</span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">{app.slotDate} {app.slotTime}</span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -132,13 +155,13 @@ const DoctorDashboard = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                          {app.status !== 'Completed' && (
+                          {app.status !== 'Completed' && app.status !== 'Rejected' && (
                             <>
-                              <button onClick={() => handleAction('Accept', app.name)} className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">Accept</button>
-                              <button onClick={() => handleAction('Reject', app.name)} className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors">Reject</button>
-                              {app.status === 'Accepted' && (
-                                <button onClick={() => handleAction('Complete Appointment', app.name)} className="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-colors">Complete Appointment</button>
-                              )}
+                              {app.status === 'Pending' && <button onClick={() => updateStatus(app._id, 'Accepted')} className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">Accept</button>}
+                              {app.status === 'Pending' && <button onClick={() => updateStatus(app._id, 'Rejected')} className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors">Reject</button>}
+                              {app.status === 'Accepted' && <button onClick={() => updateStatus(app._id, 'Waiting')} className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">Mark Arrived</button>}
+                              {app.status === 'Waiting' && <button onClick={() => updateStatus(app._id, 'In Consultation')} className="text-orange-600 hover:text-orange-900 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg transition-colors">Start Cons.</button>}
+                              {app.status === 'In Consultation' && <button onClick={() => updateStatus(app._id, 'Completed')} className="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-colors">Complete</button>}
                             </>
                           )}
                         </td>
@@ -168,11 +191,11 @@ const DoctorDashboard = () => {
               {/* Info Block */}
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center text-xl font-bold text-primary">
-                  {selectedPatient.name.charAt(0)}
+                  {selectedPatient.userData.name.charAt(0)}
                 </div>
                 <div>
-                  <h4 className="text-lg font-bold text-gray-900 dark:text-white">{selectedPatient.name}</h4>
-                  <p className="text-sm text-gray-500">Patient ID: #{selectedPatient.id}A89</p>
+                  <h4 className="text-lg font-bold text-gray-900 dark:text-white">{selectedPatient.userData.name}</h4>
+                  <p className="text-sm text-gray-500">Patient ID: #{selectedPatient.userId.substring(0,6)}</p>
                 </div>
               </div>
 
@@ -181,19 +204,13 @@ const DoctorDashboard = () => {
                 <div>
                   <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Medical History</h5>
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-300 bg-gray-50 dark:bg-slate-900/50 p-3 rounded-lg border border-gray-100 dark:border-slate-700">
-                    {selectedPatient.history}
-                  </p>
-                </div>
-                <div>
-                  <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Previous Appointments</h5>
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-300 bg-gray-50 dark:bg-slate-900/50 p-3 rounded-lg border border-gray-100 dark:border-slate-700">
-                    {selectedPatient.prevVisits} visit(s) recorded.
+                    No major issues recorded.
                   </p>
                 </div>
                 <div>
                   <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Contact Information</h5>
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-300 bg-gray-50 dark:bg-slate-900/50 p-3 rounded-lg border border-gray-100 dark:border-slate-700 flex items-center gap-2">
-                    <span>📞</span> {selectedPatient.phone}
+                    <span>📞</span> {selectedPatient.userData.phone || "Not provided"}
                   </p>
                 </div>
               </div>

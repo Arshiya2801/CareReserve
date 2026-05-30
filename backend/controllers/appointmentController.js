@@ -61,7 +61,7 @@ const bookAppointment = async (req, res) => {
       });
     }
 
-    res.status(201).json({ success: true, message: 'Appointment booked successfully' });
+    res.status(201).json({ success: true, message: 'Appointment booked successfully', appointmentId: appointment._id });
 
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -1,4 +1,5 @@
 import Doctor from '../models/doctorModel.js';
+import Appointment from '../models/appointmentModel.js';
 
 // @desc    Fetch all doctors
 // @route   GET /api/doctors
@@ -65,4 +66,68 @@ const getDoctorById = async (req, res) => {
   }
 };
 
-export { getDoctors, addDoctor, getDoctorById };
+// @desc    Get doctor's appointments
+// @route   GET /api/doctors/appointments
+// @access  Private (Doctor)
+const getDoctorAppointments = async (req, res) => {
+  try {
+    if (!req.user || !req.user.doctorId) {
+      return res.status(403).json({ success: false, message: 'Not authorized as a doctor' });
+    }
+    const appointments = await Appointment.find({ docId: req.user.doctorId }).sort({ date: -1 });
+    res.json({ success: true, appointments });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Update appointment status
+// @route   PUT /api/doctors/appointment-status
+// @access  Private (Doctor)
+const updateAppointmentStatus = async (req, res) => {
+  try {
+    const { appointmentId, status } = req.body;
+    
+    if (!req.user || !req.user.doctorId) {
+      return res.status(403).json({ success: false, message: 'Not authorized as a doctor' });
+    }
+
+    const appointment = await Appointment.findById(appointmentId);
+    if (!appointment) return res.status(404).json({ success: false, message: 'Appointment not found' });
+
+    if (appointment.docId.toString() !== req.user.doctorId.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized for this appointment' });
+    }
+
+    appointment.status = status;
+    if (status === 'Completed') appointment.isCompleted = true;
+    if (status === 'Rejected') appointment.cancelled = true;
+
+    await appointment.save();
+
+    // Emit socket events
+    const io = req.app.get('io');
+    if (io) {
+      if (status === 'Accepted') {
+        io.to(`user_${appointment.userId}`).emit('appointment-accepted', { appointmentId });
+      } else if (status === 'Waiting' || status === 'In Consultation' || status === 'Completed') {
+        // Trigger queue update
+        const room = `queue_${appointment.docId}_${appointment.slotDate}`;
+        const pending = await Appointment.countDocuments({
+          docId: appointment.docId,
+          slotDate: appointment.slotDate,
+          status: { $in: ['Accepted', 'Waiting'] }
+        });
+        io.to(room).emit('queue_update', { pendingCount: pending });
+      } else if (status === 'Rejected') {
+        io.to(`user_${appointment.userId}`).emit('appointment-rejected', { appointmentId });
+      }
+    }
+
+    res.json({ success: true, message: `Status updated to ${status}`, appointment });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export { getDoctors, addDoctor, getDoctorById, getDoctorAppointments, updateAppointmentStatus };

@@ -1,56 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Sidebar from '../../components/ui/Sidebar';
 import { Card, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { toast } from 'react-toastify';
+import axios from 'axios';
+import { AppContext } from '../../context/AppContext';
 
 const DoctorAppointments = () => {
-  // Mock appointments for "Today" demonstrating the 5-stage flow
-  const [appointments, setAppointments] = useState([
-    {
-      _id: 'app_1',
-      patientName: 'Richard James',
-      patientAge: 28,
-      patientImage: 'https://i.pravatar.cc/150?img=11',
-      time: '09:00 AM',
-      status: 'Pending',
-    },
-    {
-      _id: 'app_2',
-      patientName: 'Sarah Smith',
-      patientAge: 34,
-      patientImage: 'https://i.pravatar.cc/150?img=5',
-      time: '09:30 AM',
-      status: 'Accepted',
-    },
-    {
-      _id: 'app_3',
-      patientName: 'Michael Brown',
-      patientAge: 45,
-      patientImage: 'https://i.pravatar.cc/150?img=12',
-      time: '10:00 AM',
-      status: 'Waiting',
-    },
-    {
-      _id: 'app_4',
-      patientName: 'Emily Davis',
-      patientAge: 22,
-      patientImage: 'https://i.pravatar.cc/150?img=9',
-      time: '10:30 AM',
-      status: 'In Consultation',
+  const { backendUrl, token } = useContext(AppContext);
+  const [appointments, setAppointments] = useState([]);
+  const fetchAppointments = async () => {
+    try {
+      const { data } = await axios.get(backendUrl + '/api/doctors/appointments', { headers: { Authorization: `Bearer ${token}` } });
+      if (data.success) {
+        setAppointments(data.appointments);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
     }
-  ]);
+  };
 
-  const updateStatus = (id, newStatus) => {
-    setAppointments(prev => 
-      prev.map(app => 
-        app._id === id ? { ...app, status: newStatus } : app
-      )
-    );
-    
-    // Show specific toast based on action
-    if (newStatus === 'Rejected') toast.error("Appointment Rejected");
-    else toast.success(`Status updated to: ${newStatus}`);
+  useEffect(() => {
+    if (token) fetchAppointments();
+  }, [token]);
+
+  const updateStatus = async (id, newStatus) => {
+    try {
+      const { data } = await axios.put(
+        backendUrl + '/api/doctors/appointment-status',
+        { appointmentId: id, status: newStatus },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (data.success) {
+        if (newStatus === 'Rejected') toast.error("Appointment Rejected");
+        else toast.success(`Status updated to: ${newStatus}`);
+        fetchAppointments(); // refresh
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -143,10 +131,10 @@ const DoctorAppointments = () => {
                   
                   {/* Patient Info */}
                   <div className="flex items-center gap-4 flex-1">
-                    <img src={app.patientImage} alt={app.patientName} className="w-16 h-16 rounded-full object-cover shadow-sm" />
+                    <img src={app.userData.image || 'https://via.placeholder.com/150'} alt={app.userData.name} className="w-16 h-16 rounded-full object-cover shadow-sm" />
                     <div>
-                      <h4 className="font-bold text-lg text-gray-900 dark:text-white">{app.patientName}</h4>
-                      <p className="text-sm text-gray-500 font-medium">Age: {app.patientAge}</p>
+                      <h4 className="font-bold text-lg text-gray-900 dark:text-white">{app.userData.name}</h4>
+                      <p className="text-sm text-gray-500 font-medium">Slot: {app.slotDate}</p>
                     </div>
                   </div>
 
@@ -154,7 +142,7 @@ const DoctorAppointments = () => {
                   <div className="flex items-center gap-8 flex-1 justify-center">
                     <div className="text-center">
                       <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Time</p>
-                      <p className="font-bold text-gray-900 dark:text-white text-lg">{app.time}</p>
+                      <p className="font-bold text-gray-900 dark:text-white text-lg">{app.slotTime}</p>
                     </div>
                     <div className="text-center">
                       <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1">Status</p>

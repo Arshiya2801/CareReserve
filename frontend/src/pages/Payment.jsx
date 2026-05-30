@@ -39,6 +39,16 @@ const Payment = () => {
   const taxes = 18; // Flat tax for demo
   const totalAmount = consultationFee + platformFee + taxes;
 
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handlePayment = async () => {
     if (!token) {
       toast.error("Please login to complete payment");
@@ -46,38 +56,111 @@ const Payment = () => {
       return;
     }
 
+    if (selectedMethod !== 'razorpay') {
+      toast.error("Only Razorpay is supported in this demo.");
+      return;
+    }
+
     setIsProcessing(true);
 
-    // Simulate payment gateway delay
-    setTimeout(async () => {
-      try {
-        let day = selectedDate.getDate();
-        let month = selectedDate.getMonth() + 1;
-        let year = selectedDate.getFullYear();
-        const slotDate = `${day}_${month}_${year}`;
+    try {
+      // 1. Create Appointment first to get ID
+      let day = selectedDate.getDate();
+      let month = selectedDate.getMonth() + 1;
+      let year = selectedDate.getFullYear();
+      const slotDate = `${day}_${month}_${year}`;
 
-        const { data } = await axios.post(
-          backendUrl + '/api/appointments/book',
-          { docId, slotDate, slotTime: selectedTime },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+      const { data: appData } = await axios.post(
+        backendUrl + '/api/appointments/book',
+        { docId, slotDate, slotTime: selectedTime },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-        if (data.success) {
-          setIsProcessing(false);
-          getDoctorsData(); 
-          navigate('/confirmation', { 
-            state: { doctor, selectedDate, selectedTime } 
-          });
-        } else {
-          setIsProcessing(false);
-          toast.error(data.message);
-        }
-      } catch (error) {
-        console.log(error);
+      if (!appData.success) {
         setIsProcessing(false);
-        toast.error(error.response?.data?.message || error.message);
+        return toast.error(appData.message);
       }
-    }, 2000);
+
+      const appointmentId = appData.appointmentId;
+
+      // 2. Load Razorpay Script
+      const res = await loadRazorpayScript();
+      if (!res) {
+        setIsProcessing(false);
+        return toast.error("Razorpay SDK failed to load. Are you online?");
+      }
+
+      // 3. Create Order
+      const { data: orderData } = await axios.post(
+        backendUrl + '/api/payments/create-order',
+        { appointmentId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (!orderData.success) {
+        setIsProcessing(false);
+        return toast.error(orderData.message);
+      }
+
+      // 4. Open Razorpay Checkout Modal
+      const options = {
+        key: 'mock_key_id', // Will be ignored in test mode without valid key, or you can supply actual
+        amount: orderData.order.amount,
+        currency: orderData.order.currency,
+        name: "MediQueue",
+        description: "Consultation Fee",
+        order_id: orderData.order.id,
+        handler: async function (response) {
+          try {
+            // 5. Verify Payment
+            const verifyRes = await axios.post(
+              backendUrl + '/api/payments/verify-payment',
+              {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                appointmentId
+              },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (verifyRes.data.success) {
+              setIsProcessing(false);
+              getDoctorsData();
+              navigate('/confirmation', { 
+                state: { doctor, selectedDate, selectedTime, appointmentId } 
+              });
+            }
+          } catch (error) {
+            console.error(error);
+            toast.error("Payment verification failed");
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          name: userData.name,
+          email: userData.email,
+          contact: userData.phone || "0000000000"
+        },
+        theme: {
+          color: "#10B981"
+        }
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      
+      paymentObject.on('payment.failed', function (response){
+        toast.error("Payment Failed: " + response.error.description);
+        setIsProcessing(false);
+      });
+
+      paymentObject.open();
+
+    } catch (error) {
+      console.log(error);
+      setIsProcessing(false);
+      toast.error(error.response?.data?.message || error.message);
+    }
   };
 
 
