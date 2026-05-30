@@ -1,22 +1,33 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../context/AppContext';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { io } from 'socket.io-client';
+import Button from '../components/ui/Button';
 
 const MyAppointments = () => {
   const { backendUrl, token } = useContext(AppContext);
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const [socket, setSocket] = useState(null);
   const [queueInfo, setQueueInfo] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Dashboard State
+  const [activeTab, setActiveTab] = useState('upcoming');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const getUserAppointments = async () => {
+    setIsLoading(true);
     try {
       const { data } = await axios.get(backendUrl + '/api/appointments/my-appointments', { headers: { Authorization: `Bearer ${token}` } });
       setAppointments(data);
     } catch (error) {
       console.log(error);
       toast.error(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -26,6 +37,7 @@ const MyAppointments = () => {
     }
   }, [token]);
 
+  // Real-time queue setup
   useEffect(() => {
     if (appointments.length > 0) {
       const newSocket = io(backendUrl);
@@ -45,125 +57,217 @@ const MyAppointments = () => {
     }
   }, [appointments, backendUrl]);
 
+  // API Actions
+  const handleCancel = async (appId) => {
+    if (!window.confirm("Are you sure you want to cancel this appointment?")) return;
+    try {
+      const { data } = await axios.put(backendUrl + `/api/appointments/cancel/${appId}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      if (data.success) {
+        toast.success("Appointment cancelled");
+        getUserAppointments();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Error cancelling appointment");
+    }
+  };
+
+  // Filter Logic
+  const filteredAppointments = appointments.filter((item) => {
+    // 1. Filter by Tab
+    if (activeTab === 'upcoming') {
+      if (item.cancelled || item.isCompleted) return false;
+    } else if (activeTab === 'completed') {
+      if (!item.isCompleted) return false;
+    } else if (activeTab === 'cancelled') {
+      if (!item.cancelled) return false;
+    }
+
+    // 2. Filter by Search (Doctor Name or Speciality)
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      const matchName = item.docData.name.toLowerCase().includes(term);
+      const matchSpec = item.docData.speciality.toLowerCase().includes(term);
+      if (!matchName && !matchSpec) return false;
+    }
+
+    return true;
+  });
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="mb-8">
-        <h2 className="text-3xl font-extrabold text-gray-900">My Appointments</h2>
-        <p className="text-gray-500 mt-2">Manage your bookings and track your wait time in real-time.</p>
-      </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
       
-      {/* Premium Real-Time Queue Widget */}
-      {queueInfo.pendingCount !== undefined && (
-        <div className="bg-gradient-to-r from-primary to-secondary p-[1px] rounded-2xl shadow-xl mb-10 transform hover:scale-[1.01] transition-transform duration-300">
-          <div className="bg-white p-6 rounded-2xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between">
+      {/* HEADER & TOP BAR */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">My Appointments</h2>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Manage your bookings and track your wait time.</p>
+        </div>
+        
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="relative flex-1 md:w-64">
+            <input 
+              type="text" 
+              placeholder="Search doctors..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary text-sm shadow-sm text-gray-900 dark:text-white"
+            />
+            <svg className="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+        </div>
+      </div>
+
+      {/* QUEUE WIDGET */}
+      {queueInfo.pendingCount !== undefined && activeTab === 'upcoming' && (
+        <div className="bg-gradient-to-r from-primary to-secondary p-[1px] rounded-2xl shadow-lg mb-8 transform hover:-translate-y-0.5 transition-all duration-300">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between">
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl"></div>
             
             <div className="flex items-center gap-4 z-10 w-full sm:w-auto">
-              <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center relative">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center relative">
                 <div className="absolute inset-0 border-2 border-primary rounded-full animate-ping opacity-20"></div>
-                <span className="w-4 h-4 bg-primary rounded-full animate-pulse shadow-[0_0_10px_rgba(13,148,136,0.8)]"></span>
+                <span className="w-3 h-3 bg-primary rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Live Queue Tracking</h3>
-                <p className="text-sm text-gray-500">Your doctor's current waiting room status</p>
+                <h3 className="text-base font-bold text-gray-900 dark:text-white">Live Queue Tracking</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Your doctor's waiting room</p>
               </div>
             </div>
 
-            <div className="mt-4 sm:mt-0 bg-gray-50 border border-gray-100 px-6 py-3 rounded-xl flex flex-col items-center z-10 w-full sm:w-auto">
-              <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+            <div className="mt-4 sm:mt-0 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 px-5 py-2 rounded-xl flex flex-col items-center z-10 min-w-[120px]">
+              <span className="text-2xl font-black text-primary">
                 {queueInfo.pendingCount}
               </span>
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Patients Waiting</span>
+              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Waiting</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Appointment Cards */}
-      <div className="grid grid-cols-1 gap-6">
-        {appointments.map((item, index) => (
-          <div
-            key={index}
-            className={`flex flex-col md:flex-row gap-6 p-6 rounded-2xl border transition-all duration-300 ${
-              item.isCompleted ? 'bg-gray-50 border-gray-200 opacity-80' : 'bg-white border-teal-50 shadow-sm hover:shadow-md'
-            } relative overflow-hidden`}
+      {/* TABS */}
+      <div className="flex gap-2 overflow-x-auto pb-4 mb-2 border-b border-gray-200 dark:border-slate-700 hide-scrollbar">
+        {['upcoming', 'completed', 'cancelled'].map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-5 py-2.5 rounded-t-xl text-sm font-bold capitalize transition-all duration-200 ${
+              activeTab === tab 
+                ? 'bg-white dark:bg-surface-dark text-primary border-t border-l border-r border-gray-200 dark:border-slate-700 -mb-[1px] z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]' 
+                : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800/50'
+            }`}
           >
-            {item.isCompleted && (
-               <div className="absolute top-4 right-4 bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                 COMPLETED
-               </div>
-            )}
-            
-            {/* Doctor Image */}
-            <div className="flex-shrink-0 relative group">
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-xl overflow-hidden bg-accent relative z-10">
-                <img
-                  src={item.docData.image}
-                  alt={item.docData.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-              </div>
-            </div>
-
-            {/* Appointment Info */}
-            <div className="flex-1 flex flex-col justify-between">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">{item.docData.name}</h3>
-                <p className="text-sm font-semibold text-secondary mb-3">{item.docData.speciality}</p>
-                
-                <div className="flex items-start gap-2 text-sm text-gray-600 mb-2">
-                  <span className="text-gray-400 mt-0.5">📍</span>
-                  <p>{item.docData.address?.line1}<br/>{item.docData.address?.line2}</p>
-                </div>
-              </div>
-
-              <div className="bg-accent/30 rounded-lg px-4 py-3 mt-4 inline-flex items-center gap-3 border border-teal-50">
-                <span className="text-xl">📅</span>
-                <div>
-                  <p className="text-xs text-gray-500 font-medium">Scheduled For</p>
-                  <p className="text-sm font-bold text-gray-900">{item.slotDate} <span className="text-gray-400 mx-1">|</span> <span className="text-primary">{item.slotTime}</span></p>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col gap-3 justify-center min-w-[200px]">
-              {!item.isCompleted && (
-                <>
-                  <button className="w-full text-sm font-semibold bg-gray-50 text-gray-700 border border-gray-200 py-3 rounded-xl hover:bg-gray-100 hover:text-gray-900 transition-all">
-                    Pay Online
-                  </button>
-                  <button className="w-full text-sm font-semibold bg-red-50 text-red-600 border border-red-100 py-3 rounded-xl hover:bg-red-500 hover:text-white transition-all">
-                    Cancel Booking
-                  </button>
-                  {/* TEST BUTTON for Queue Tracking */}
-                  <button 
-                    onClick={async () => {
-                      try {
-                        await axios.put(backendUrl + '/api/appointments/complete/' + item._id, {}, { headers: { Authorization: `Bearer ${token}` } });
-                        toast.success("Appointment completed! (Queue Advanced)");
-                        getUserAppointments();
-                      } catch (error) {
-                        toast.error(error.message);
-                      }
-                    }}
-                    className="w-full text-sm font-semibold bg-gradient-to-r from-primary to-secondary text-white py-3 rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all mt-2">
-                    Simulate Doctor Visit
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
+            {tab}
+            {/* Show counts logic can go here if needed */}
+          </button>
         ))}
-        {appointments.length === 0 && (
-          <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
-            <p className="text-gray-500 mb-4">You have no upcoming appointments.</p>
-            <button onClick={() => window.location.href='/doctors'} className="bg-primary text-white px-6 py-2.5 rounded-full font-medium hover:bg-teal-700 transition-colors">
-              Book an Appointment
-            </button>
+      </div>
+
+      {/* MAIN CONTENT / CARDS */}
+      <div className="bg-white dark:bg-surface-dark border border-gray-200 dark:border-slate-700 rounded-b-2xl rounded-tr-2xl p-6 min-h-[400px]">
+        {isLoading ? (
+          <div className="h-64 flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : filteredAppointments.length === 0 ? (
+          <div className="h-64 flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-2xl">
+              📅
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">No appointments found</h3>
+            <p className="text-gray-500 dark:text-gray-400 text-sm max-w-sm">
+              {searchTerm 
+                ? "No appointments match your search criteria. Try a different term." 
+                : `You don't have any ${activeTab} appointments.`}
+            </p>
+            {activeTab === 'upcoming' && !searchTerm && (
+              <Button onClick={() => navigate('/doctors')} variant="primary" className="mt-6">
+                Book an Appointment
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredAppointments.map((item, index) => (
+              <div 
+                key={index}
+                className="bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl overflow-hidden hover:shadow-md transition-shadow flex flex-col"
+              >
+                {/* Status Banner */}
+                <div className={`px-4 py-2 text-xs font-bold uppercase tracking-wider text-white ${
+                  item.cancelled ? 'bg-red-500' : 
+                  item.isCompleted ? 'bg-blue-500' : 
+                  'bg-primary'
+                }`}>
+                  {item.cancelled ? 'Cancelled' : item.isCompleted ? 'Completed' : 'Upcoming'}
+                </div>
+
+                <div className="p-5 flex-1">
+                  {/* Doctor Info */}
+                  <div className="flex gap-4 items-start mb-5">
+                    <img src={item.docData.image} alt={item.docData.name} className="w-16 h-16 rounded-xl object-cover bg-white dark:bg-slate-700 shadow-sm" />
+                    <div>
+                      <h3 className="font-bold text-gray-900 dark:text-white">{item.docData.name}</h3>
+                      <p className="text-xs text-primary font-semibold">{item.docData.speciality}</p>
+                    </div>
+                  </div>
+
+                  {/* Date & Time */}
+                  <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-gray-100 dark:border-slate-700 mb-5">
+                    <div className="flex items-center gap-2 mb-1">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-white">{item.slotDate}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      <span className="text-sm font-bold text-primary">{item.slotTime}</span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-col gap-2 mt-auto">
+                    <Button 
+                      variant="outline" 
+                      fullWidth 
+                      onClick={() => navigate(`/doctor/${item.docData._id}`)}
+                    >
+                      View Details
+                    </Button>
+                    
+                    {activeTab === 'upcoming' && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button 
+                          variant="secondary" 
+                          onClick={() => handleCancel(item._id)}
+                          className="bg-red-50 text-red-600 border-red-100 hover:bg-red-500 hover:text-white dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30 dark:hover:bg-red-600 dark:hover:text-white"
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          onClick={() => {
+                            if(window.confirm("Do you want to reschedule this appointment? You will be taken to the booking page.")){
+                              axios.put(backendUrl + `/api/appointments/cancel/${item._id}`, {}, { headers: { Authorization: `Bearer ${token}` } }).then(() => {
+                                navigate(`/book/${item.docData._id}`);
+                              });
+                            }
+                          }}
+                        >
+                          Reschedule
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
+
     </div>
   );
 };

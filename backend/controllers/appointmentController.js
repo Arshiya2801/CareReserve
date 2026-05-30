@@ -112,4 +112,39 @@ const completeAppointment = async (req, res) => {
   }
 };
 
-export { bookAppointment, myAppointments, completeAppointment };
+// @desc    Cancel an appointment
+// @route   PUT /api/appointments/cancel/:id
+// @access  Private
+const cancelAppointment = async (req, res) => {
+  try {
+    const appointmentId = req.params.id;
+    const appointment = await Appointment.findById(appointmentId);
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Appointment not found' });
+    }
+
+    // Verify user owns the appointment
+    if (appointment.userId.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: 'User not authorized' });
+    }
+
+    appointment.cancelled = true;
+    await appointment.save();
+
+    // Remove the booked slot from the doctor
+    const docData = await Doctor.findById(appointment.docId);
+    if (docData && docData.slots_booked && docData.slots_booked[appointment.slotDate]) {
+      docData.slots_booked[appointment.slotDate] = docData.slots_booked[appointment.slotDate].filter(
+        time => time !== appointment.slotTime
+      );
+      await Doctor.findByIdAndUpdate(appointment.docId, { slots_booked: docData.slots_booked });
+    }
+
+    res.json({ success: true, message: 'Appointment cancelled successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export { bookAppointment, myAppointments, completeAppointment, cancelAppointment };
