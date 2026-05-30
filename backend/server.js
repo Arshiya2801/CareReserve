@@ -10,7 +10,6 @@ import appointmentRoutes from './routes/appointmentRoute.js';
 import paymentRoutes from './routes/paymentRoute.js';
 import notificationRoutes from './routes/notificationRoute.js';
 import helmet from 'helmet';
-import mongoSanitize from 'express-mongo-sanitize';
 import rateLimit from 'express-rate-limit';
 
 // Load env vars
@@ -59,7 +58,6 @@ app.use(cors({
 
 // Security middleware
 app.use(helmet());
-app.use(mongoSanitize());
 
 // Rate Limiting
 const apiLimiter = rateLimit({

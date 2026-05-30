@@ -25,16 +25,16 @@ const Hero = () => {
         
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 w-full sm:w-auto">
           <button 
-            onClick={() => navigate('/doctors')} 
+            onClick={() => navigate('/login?role=patient')} 
             className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary text-white px-8 py-4 rounded-full font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300"
           >
-            Find Doctors
+            Book Appointment
           </button>
           <button 
-            onClick={() => navigate('/login')} 
+            onClick={() => navigate('/login?role=doctor')} 
             className="w-full sm:w-auto bg-white text-gray-800 border-2 border-gray-200 px-8 py-3.5 rounded-full font-semibold hover:border-primary hover:text-primary transition-all duration-300"
           >
-            Book Appointment
+            Doctor Portal
           </button>
         </div>
         

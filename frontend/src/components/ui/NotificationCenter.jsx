@@ -1,6 +1,3 @@
-import React, { useState, useRef, useEffect } from 'react';
-
-const mockNotifications = [
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
 import axios from 'axios';

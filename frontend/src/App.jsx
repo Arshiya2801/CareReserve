@@ -1,14 +1,11 @@
 import React from 'react'
 import {Route, Routes, Navigate} from 'react-router-dom'
 import Home from './pages/Home'
-import About from './pages/About'
-import Contact from './pages/Contact'
 import Doctors from './pages/Doctors'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import MyAppointments from './pages/MyAppointments'
 import MyProfile from './pages/MyProfile'
-import Appointment from './pages/Appointment'
 import DesignSystem from './pages/DesignSystem'
 import PatientDashboard from './pages/patient/PatientDashboard'
 import DoctorDashboard from './pages/doctor/DoctorDashboard'
@@ -18,44 +15,47 @@ import BookingFlow from './pages/BookingFlow'
 import Payment from './pages/Payment'
 import AppointmentConfirmation from './pages/AppointmentConfirmation'
 import QueueTracking from './pages/QueueTracking'
-import Navbar from './components/Navbar'
-import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
+import PublicLayout from './components/layouts/PublicLayout'
+import PatientLayout from './components/layouts/PatientLayout'
+import DoctorLayout from './components/layouts/DoctorLayout'
 
 const App = () => {
   return (
-    <div className='mx-4 sm:mx-[10%]'>
-      <Navbar/>
-      <Routes>
-        {/* Public Routes */}
+    <Routes>
+      {/* Public Routes with Navbar and Footer */}
+      <Route element={<PublicLayout />}>
         <Route path='/' element={<Home/>} />
         <Route path='/login' element={<Login/>} />
         <Route path='/signup' element={<Signup/>} />
         <Route path='/design-system' element={<DesignSystem/>} />
-        <Route path='/about' element={<About/>} />
-        <Route path='/contact' element={<Contact/>} />
         <Route path='/doctors/:speciality' element={<Doctors/>} />
         <Route path='/doctors' element={<Doctors/>} />
         <Route path='/doctor/:docId' element={<DoctorProfile/>} />
-        
-        {/* Protected Patient Routes */}
-        <Route path='/patient/dashboard' element={<ProtectedRoute allowedRoles={['patient']}><PatientDashboard/></ProtectedRoute>} />
-        <Route path='/my-appointments' element={<ProtectedRoute allowedRoles={['patient']}><MyAppointments/></ProtectedRoute>} />
-        <Route path='/my-profile' element={<ProtectedRoute allowedRoles={['patient', 'doctor']}><MyProfile/></ProtectedRoute>} />
-        <Route path='/book/:docId' element={<ProtectedRoute allowedRoles={['patient']}><BookingFlow/></ProtectedRoute>} />
-        <Route path='/payment' element={<ProtectedRoute allowedRoles={['patient']}><Payment/></ProtectedRoute>} />
-        <Route path='/confirmation' element={<ProtectedRoute allowedRoles={['patient']}><AppointmentConfirmation/></ProtectedRoute>} />
-        <Route path='/track/:appointmentId' element={<ProtectedRoute allowedRoles={['patient']}><QueueTracking/></ProtectedRoute>} />
-        
-        {/* Legacy route redirect */}
-        <Route path='/appointment/:docId' element={<Navigate to="/doctors" replace />} />
+      </Route>
 
-        {/* Protected Doctor Routes */}
-        <Route path='/doctor/dashboard' element={<ProtectedRoute allowedRoles={['doctor']}><DoctorDashboard/></ProtectedRoute>} />
-        <Route path='/doctor/appointments' element={<ProtectedRoute allowedRoles={['doctor']}><DoctorAppointments/></ProtectedRoute>} />
-      </Routes>
-      <Footer/>
-    </div>
+      {/* Protected Patient Routes (PatientLayout) */}
+      <Route element={<ProtectedRoute allowedRoles={['patient']}><PatientLayout/></ProtectedRoute>}>
+        <Route path='/patient/dashboard' element={<PatientDashboard/>} />
+        <Route path='/my-appointments' element={<MyAppointments/>} />
+        <Route path='/my-profile' element={<MyProfile/>} />
+        <Route path='/book/:docId' element={<BookingFlow/>} />
+        <Route path='/payment' element={<Payment/>} />
+        <Route path='/confirmation' element={<AppointmentConfirmation/>} />
+        <Route path='/track/:appointmentId' element={<QueueTracking/>} />
+      </Route>
+
+      {/* Protected Doctor Routes (DoctorLayout) */}
+      <Route element={<ProtectedRoute allowedRoles={['doctor']}><DoctorLayout/></ProtectedRoute>}>
+        <Route path='/doctor/dashboard' element={<DoctorDashboard/>} />
+        <Route path='/doctor/appointments' element={<DoctorAppointments/>} />
+        {/* Profile works for both, so we duplicate the route or handle it. I'll duplicate here. */}
+        <Route path='/doctor/profile' element={<MyProfile/>} />
+      </Route>
+
+      {/* Legacy route redirect */}
+      <Route path='/appointment/:docId' element={<Navigate to="/doctors" replace />} />
+    </Routes>
   )
 }
 

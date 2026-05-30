@@ -11,7 +11,7 @@ const Signup = () => {
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [gender, setGender] = useState('Male');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('Patient');
@@ -52,16 +52,8 @@ const Signup = () => {
       newErrors.email = "Email format is invalid";
     }
     
-    if (!phone) {
-      newErrors.phone = "Phone Number is required";
-    } else if (phone.length < 10) {
-      newErrors.phone = "Phone Number is invalid";
-    }
-
     if (!password) {
       newErrors.password = "Password is required";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
     }
 
     if (password !== confirmPassword) {
@@ -77,7 +69,7 @@ const Signup = () => {
     if (!validate()) return;
 
     try {
-      const { data } = await axios.post(backendUrl + '/api/users/register', { name, email, password, phone, role: role.toLowerCase() });
+      const { data } = await axios.post(backendUrl + '/api/users/register', { name, email, password, gender, role: role.toLowerCase() });
       if (data.token) {
         localStorage.setItem('token', data.token);
         setToken(data.token);
@@ -149,14 +141,15 @@ const Signup = () => {
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
               <div>
-                <input 
-                  type="tel" 
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className={`w-full px-4 py-3 rounded-xl border ${errors.phone ? 'border-red-500' : 'border-gray-300'} focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all`}
-                  placeholder="Phone Number"
-                />
-                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all bg-white"
+                >
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
             </div>
 
