@@ -90,8 +90,12 @@ const Signup = () => {
         }
       }
     } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || error.message);
+      const errorMessage = error.response?.data?.message || error.message;
+      if (errorMessage.toLowerCase().includes('already exists')) {
+        toast.error("User already exists. Please login instead.");
+      } else {
+        toast.error(errorMessage);
+      }
     }
   };
 

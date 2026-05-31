@@ -20,9 +20,7 @@ const PatientLayout = () => {
     { label: 'My Appointments', path: '/my-appointments', icon: '📅' },
     { label: 'Queue Tracking', path: '/patient/queue-tracking', icon: '⏱️' },
     { label: 'Appointment History', path: '/patient/appointment-history', icon: '📁' },
-    { label: 'Notifications', path: '/patient/notifications', icon: '🔔' },
     { label: 'Profile', path: '/my-profile', icon: '👤' },
-    { label: 'Settings', path: '/patient/settings', icon: '⚙️' },
   ];
 
   return (

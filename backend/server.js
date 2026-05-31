@@ -57,7 +57,7 @@ app.use(cors({
 }));
 
 // Security middleware
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: false }));
 
 // Rate Limiting
 const apiLimiter = rateLimit({

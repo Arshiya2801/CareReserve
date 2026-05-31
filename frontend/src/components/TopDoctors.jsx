@@ -35,14 +35,15 @@ const TopDoctors = () => {
                     </div>
                 )}
                 
-                <div className="h-64 overflow-hidden bg-accent dark:bg-slate-700 relative">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-0"></div>
-                  <img
-                  className="w-full h-full object-cover relative z-10 group-hover:scale-105 transition-transform duration-700"
-                  src={item.image}
-                  onError={(e) => { e.target.onerror = null; e.target.src = assets.profile_pic; }}
-                  alt={`${item.name} profile`}
-                  />
+                <div className="h-64 overflow-hidden bg-primary/5 dark:bg-slate-700/50 flex items-center justify-center relative transition-colors duration-500 group-hover:bg-primary/10 dark:group-hover:bg-slate-700 border-b border-gray-100 dark:border-slate-700">
+                    <div className="w-32 h-32 rounded-full bg-white dark:bg-slate-800 shadow-md flex items-center justify-center border-4 border-primary/10 group-hover:border-primary/30 transition-colors duration-500 relative z-10">
+                        <span className="text-4xl font-extrabold text-primary tracking-wider">
+                            {item.name.replace(/^Dr\.?\s+/i, '').split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)}
+                        </span>
+                    </div>
+                    {/* Decorative Background Elements */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/10 rounded-full blur-3xl -ml-10 -mb-10"></div>
                 </div>
 
                 <div className="p-6">
