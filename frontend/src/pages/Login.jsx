@@ -18,6 +18,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState('');
 
   useEffect(() => {
     if (token) {
@@ -50,6 +51,7 @@ const Login = () => {
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
+    setApiError(''); // Clear previous API errors
     if (!validate()) return;
 
     try {
@@ -67,7 +69,7 @@ const Login = () => {
         }
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
+      setApiError(error.response?.data?.message || "An error occurred during login. Please try again.");
     }
   };
 
@@ -98,6 +100,13 @@ const Login = () => {
           </div>
 
           <form onSubmit={onSubmitHandler} className="space-y-5">
+            {apiError && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium flex items-start gap-2">
+                <span className="mt-0.5">⚠️</span>
+                <span>{apiError}</span>
+              </div>
+            )}
+            
             {/* Google Auth Mock Button */}
             <button 
               type="button" 

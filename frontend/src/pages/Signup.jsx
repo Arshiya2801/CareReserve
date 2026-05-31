@@ -20,6 +20,7 @@ const Signup = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState('');
 
   useEffect(() => {
     if (token) {
@@ -73,6 +74,7 @@ const Signup = () => {
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
+    setApiError(''); // Clear previous API errors
     if (!validate()) return;
 
     try {
@@ -92,9 +94,9 @@ const Signup = () => {
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message;
       if (errorMessage.toLowerCase().includes('already exists')) {
-        toast.error("User already exists. Please login instead.");
+        setApiError("An account with this email already exists. Please log in instead.");
       } else {
-        toast.error(errorMessage);
+        setApiError(errorMessage);
       }
     }
   };
@@ -112,6 +114,13 @@ const Signup = () => {
 
           <form onSubmit={onSubmitHandler} className="space-y-4">
             
+            {apiError && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium flex items-start gap-2">
+                <span className="mt-0.5">⚠️</span>
+                <span>{apiError}</span>
+              </div>
+            )}
+
             {/* Role Selection */}
             <div className="flex bg-gray-100 p-1 rounded-xl mb-4">
               <button

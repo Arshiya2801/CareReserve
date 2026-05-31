@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { AppContext } from '../context/AppContext';
 import { Card, CardContent } from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import DoctorAvatar from '../components/ui/DoctorAvatar';
 
 const Payment = () => {
   const location = useLocation();
@@ -209,7 +210,7 @@ const Payment = () => {
               </div>
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <img src={doctor.image} alt={doctor.name} className="w-16 h-16 rounded-xl object-cover bg-gray-100" />
+                  <DoctorAvatar doctor={doctor} className="w-16 h-16 text-xl" showContainer={false} />
                   <div className="flex-1 space-y-1">
                     <h4 className="font-bold text-lg text-gray-900 dark:text-white">{doctor.name}</h4>
                     <p className="text-primary font-medium text-sm">{doctor.speciality}</p>
