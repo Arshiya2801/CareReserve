@@ -6,7 +6,9 @@ import { toast } from 'react-toastify';
 import { io } from 'socket.io-client';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
+import DoctorAvatar from '../components/ui/DoctorAvatar';
 import AppointmentCalendar from '../components/ui/AppointmentCalendar';
+import { Calendar } from 'lucide-react';
 
 const MyAppointments = () => {
   const { backendUrl, token } = useContext(AppContext);
@@ -190,7 +192,7 @@ const MyAppointments = () => {
         ) : filteredAppointments.length === 0 ? (
           <div className="h-64 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-2xl">
-              📅
+              <Calendar className="w-5 h-5 text-gray-500" />
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">No appointments found</h3>
             <p className="text-gray-500 dark:text-gray-400 text-sm max-w-sm">
@@ -223,12 +225,7 @@ const MyAppointments = () => {
                 <div className="p-5 flex-1">
                   {/* Doctor Info */}
                   <div className="flex gap-4 items-start mb-5">
-                    <img 
-                      src={item.docData.image || 'https://via.placeholder.com/150'} 
-                      alt={item.docData.name} 
-                      onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/150'; }}
-                      className="w-16 h-16 rounded-xl object-cover bg-white dark:bg-slate-700 shadow-sm" 
-                    />
+                    <DoctorAvatar doctor={item.docData} className="w-16 h-16 rounded-xl object-cover bg-white dark:bg-slate-700 shadow-sm" showContainer={false} />
                     <div>
                       <h3 className="font-bold text-gray-900 dark:text-white">{item.docData.name}</h3>
                       <p className="text-xs text-primary font-semibold">{item.docData.speciality}</p>

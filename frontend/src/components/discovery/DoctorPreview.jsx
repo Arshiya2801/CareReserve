@@ -3,6 +3,7 @@ import { Card, CardContent } from '../ui/Card';
 import EmptyState from '../ui/EmptyState';
 import { assets } from '../../assets/assets';
 import { Link } from 'react-router-dom';
+import DoctorAvatar from '../ui/DoctorAvatar';
 
 const DoctorPreview = ({ doctor, currencySymbol }) => {
   if (!doctor) {
@@ -19,12 +20,7 @@ const DoctorPreview = ({ doctor, currencySymbol }) => {
       {/* Header Banner */}
       <div className="h-32 bg-gradient-to-r from-primary to-secondary relative">
         <div className="absolute -bottom-12 left-6">
-          <img 
-            src={doctor.image} 
-            alt={doctor.name}
-            onError={(e) => { e.target.onerror = null; e.target.src = assets.profile_pic; }}
-            className="w-24 h-24 rounded-2xl object-cover bg-white p-1 shadow-lg border border-gray-100"
-          />
+          <DoctorAvatar doctor={doctor} className="w-24 h-24 rounded-2xl shadow-lg border-4 border-white dark:border-slate-800 bg-white" />
         </div>
       </div>
       

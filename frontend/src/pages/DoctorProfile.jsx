@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { AppContext } from '../context/AppContext';
 import { Card, CardContent } from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import DoctorAvatar from '../components/ui/DoctorAvatar';
 import { assets } from '../assets/assets';
 
 const DoctorProfile = () => {
@@ -56,13 +57,8 @@ const DoctorProfile = () => {
           <div className="flex flex-col md:flex-row gap-8 items-start">
             
             {/* Avatar */}
-            <div className="-mt-20 shrink-0">
-              <img 
-                src={docInfo.image} 
-                alt={docInfo.name}
-                onError={(e) => { e.target.onerror = null; e.target.src = assets.profile_pic; }}
-                className="w-40 h-40 rounded-2xl object-cover bg-white dark:bg-slate-800 p-1.5 shadow-xl border border-gray-100 dark:border-slate-700"
-              />
+            <div className="-mt-20 shrink-0 w-40 h-40 rounded-2xl bg-white dark:bg-slate-800 p-1.5 shadow-xl border border-gray-100 dark:border-slate-700 overflow-hidden">
+              <DoctorAvatar doctor={docInfo} className="w-full h-full text-5xl md:text-7xl shadow-none border-0" showContainer={false} />
             </div>
             
             {/* Info & Actions */}

@@ -7,6 +7,7 @@ import Hero from '../components/Hero'
 import Statistics from '../components/Statistics'
 import HowItWorks from '../components/HowItWorks'
 import Testimonials from '../components/Testimonials'
+import { Phone, Mail } from 'lucide-react'
 
 const Home = () => {
   return (
@@ -33,10 +34,10 @@ const Home = () => {
         {/* Contact Info Added for Task 3 */}
         <div className="flex flex-col items-center gap-2 mb-8 text-gray-800 dark:text-gray-200 font-medium">
           <p className="flex items-center gap-2">
-            <span>📞</span> +91-12345-67891
+            <Phone className="w-5 h-5 text-primary" /> +91-12345-67891
           </p>
           <p className="flex items-center gap-2">
-            <span>✉️</span> <a href="mailto:support@mediqueue.com" className="text-primary hover:underline">support@mediqueue.com</a>
+            <Mail className="w-5 h-5 text-primary" /> <a href="mailto:support@mediqueue.com" className="text-primary hover:underline">support@mediqueue.com</a>
           </p>
         </div>
 

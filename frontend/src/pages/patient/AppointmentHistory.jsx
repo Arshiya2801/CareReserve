@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Card, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import DoctorAvatar from '../../components/ui/DoctorAvatar';
 
 const AppointmentHistory = () => {
   const { backendUrl, token } = useContext(AppContext);
@@ -108,12 +109,7 @@ const AppointmentHistory = () => {
                 className="bg-gray-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:shadow-sm transition-shadow"
               >
                 <div className="flex items-center gap-4">
-                  <img 
-                    src={item.docData.image || 'https://via.placeholder.com/150'} 
-                    alt={item.docData.name} 
-                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/150'; }}
-                    className="w-14 h-14 rounded-xl object-cover bg-white dark:bg-slate-700 shadow-sm" 
-                  />
+                  <DoctorAvatar doctor={item.docData} className="w-14 h-14 rounded-xl shadow-sm text-lg" showContainer={false} />
                   <div>
                     <h3 className="font-bold text-gray-900 dark:text-white">{item.docData.name}</h3>
                     <p className="text-xs text-primary font-semibold">{item.docData.speciality}</p>

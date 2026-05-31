@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { AppContext } from '../context/AppContext';
 import { Card, CardContent } from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import DoctorAvatar from '../components/ui/DoctorAvatar';
 import AppointmentCalendar from '../components/ui/AppointmentCalendar';
 
 const BookingFlow = () => {
@@ -88,7 +89,7 @@ const BookingFlow = () => {
               <div className="bg-gradient-to-r from-primary to-secondary p-6 text-white">
                 <h3 className="font-bold text-lg mb-4 opacity-90">Order Summary</h3>
                 <div className="flex items-center gap-4">
-                  <img src={docInfo.image} alt={docInfo.name} className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm bg-white" />
+                  <DoctorAvatar doctor={docInfo} className="w-16 h-16 text-xl shadow-sm border-2 border-white" showContainer={false} />
                   <div>
                     <p className="font-bold text-lg leading-tight">{docInfo.name}</p>
                     <p className="text-sm font-medium opacity-90">{docInfo.speciality}</p>

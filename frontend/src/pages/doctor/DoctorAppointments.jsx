@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Card, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { toast } from 'react-toastify';
+import DoctorAvatar from '../../components/ui/DoctorAvatar';
 import axios from 'axios';
 import { AppContext } from '../../context/AppContext';
 
@@ -126,12 +127,7 @@ const DoctorAppointments = () => {
               
               {/* Patient Info */}
               <div className="flex items-center gap-4 flex-1">
-                <img 
-                  src={app.userData.image || 'https://via.placeholder.com/150'} 
-                  alt={app.userData.name} 
-                  onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/150'; }}
-                  className="w-16 h-16 rounded-full object-cover shadow-sm" 
-                />
+                <DoctorAvatar doctor={app.userData} className="w-16 h-16 rounded-full object-cover shadow-sm" showContainer={false} />
                 <div>
                   <h4 className="font-bold text-lg text-gray-900 dark:text-white">{app.userData.name}</h4>
                   <p className="text-sm text-gray-500 font-medium">Slot: {app.slotDate}</p>

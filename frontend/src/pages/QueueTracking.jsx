@@ -4,6 +4,7 @@ import { io } from 'socket.io-client';
 import { AppContext } from '../context/AppContext';
 import { Card, CardContent } from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import { Calendar } from 'lucide-react';
 
 const QueueTracking = () => {
   const { appointmentId } = useParams();
@@ -167,7 +168,7 @@ const QueueTracking = () => {
             <Card className="border border-gray-100 dark:border-slate-700 shadow-sm bg-white dark:bg-surface-dark">
               <div className="p-6 border-b border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50">
                 <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <span>📅</span> Appointment Details
+                  <Calendar className="w-5 h-5" /> Appointment Details
                 </h3>
               </div>
               <CardContent className="p-6 space-y-4">

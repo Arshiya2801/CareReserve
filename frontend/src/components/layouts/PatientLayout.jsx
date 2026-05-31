@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import Sidebar from '../ui/Sidebar';
 import { AppContext } from '../../context/AppContext';
+import { Home, Search, Calendar, Clock, Folder, User } from 'lucide-react';
 
 const PatientLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -15,12 +16,12 @@ const PatientLayout = () => {
   };
 
   const navItems = [
-    { label: 'Dashboard', path: '/patient/dashboard', icon: '🏠' },
-    { label: 'Book Appointment', path: '/patient/book-appointment', icon: '🔍' },
-    { label: 'My Appointments', path: '/my-appointments', icon: '📅' },
-    { label: 'Queue Tracking', path: '/patient/queue-tracking', icon: '⏱️' },
-    { label: 'Appointment History', path: '/patient/appointment-history', icon: '📁' },
-    { label: 'Profile', path: '/my-profile', icon: '👤' },
+    { label: 'Dashboard', path: '/patient/dashboard', icon: <Home className="w-5 h-5" /> },
+    { label: 'Book Appointment', path: '/patient/book-appointment', icon: <Search className="w-5 h-5" /> },
+    { label: 'My Appointments', path: '/my-appointments', icon: <Calendar className="w-5 h-5" /> },
+    { label: 'Queue Tracking', path: '/patient/queue-tracking', icon: <Clock className="w-5 h-5" /> },
+    { label: 'Appointment History', path: '/patient/appointment-history', icon: <Folder className="w-5 h-5" /> },
+    { label: 'Profile', path: '/my-profile', icon: <User className="w-5 h-5" /> },
   ];
 
   return (

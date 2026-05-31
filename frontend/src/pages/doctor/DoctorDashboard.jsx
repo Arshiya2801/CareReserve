@@ -4,9 +4,10 @@ import Button from '../../components/ui/Button';
 import axios from 'axios';
 import { AppContext } from '../../context/AppContext';
 import { toast } from 'react-toastify';
+import { Calendar, Users, DollarSign, Activity, Phone } from 'lucide-react';
 
 const DoctorDashboard = () => {
-  const { backendUrl, token } = useContext(AppContext);
+  const { backendUrl, token, userData } = useContext(AppContext);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [appointments, setAppointments] = useState([]);
   
@@ -25,16 +26,6 @@ const DoctorDashboard = () => {
     if (token) fetchAppointments();
   }, [token]);
 
-  // Exact Sidebar Links Requested
-  const navItems = [
-    { label: 'Dashboard', path: '/doctor/dashboard', icon: '📊' },
-    { label: 'Appointments', path: '/doctor/appointments', icon: '📅' },
-    { label: 'Patients', path: '/doctor/patients', icon: '👥' },
-    { label: 'Earnings', path: '/doctor/earnings', icon: '💰' },
-    { label: 'Profile', path: '/my-profile', icon: '👤' },
-    { label: 'Settings', path: '/doctor/settings', icon: '⚙️' },
-    { label: 'Logout', path: '/login', icon: '🚪' },
-  ];
 
   const updateStatus = async (id, newStatus) => {
     try {
@@ -54,6 +45,14 @@ const DoctorDashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
+      <div className="flex flex-col md:flex-row justify-between md:items-end gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+            Welcome Back, {userData?.name ? userData.name.split(' ')[0] : 'Doctor'}
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-2">Doctor Dashboard</p>
+        </div>
+      </div>
       
       {/* 1. Dashboard Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -63,7 +62,9 @@ const DoctorDashboard = () => {
               <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">Today's Appointments</p>
               <p className="text-3xl font-black text-gray-900 dark:text-white mt-1">12</p>
             </div>
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xl">📅</div>
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <Calendar className="w-6 h-6" />
+            </div>
           </CardContent>
         </Card>
 
@@ -73,7 +74,9 @@ const DoctorDashboard = () => {
               <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">Upcoming Patients</p>
               <p className="text-3xl font-black text-gray-900 dark:text-white mt-1">8</p>
             </div>
-            <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 text-xl">👥</div>
+            <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+              <Users className="w-6 h-6" />
+            </div>
           </CardContent>
         </Card>
 
@@ -83,7 +86,9 @@ const DoctorDashboard = () => {
               <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">Monthly Earnings</p>
               <p className="text-3xl font-black text-gray-900 dark:text-white mt-1">$4,250</p>
             </div>
-            <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 text-xl">💰</div>
+            <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
+              <DollarSign className="w-6 h-6" />
+            </div>
           </CardContent>
         </Card>
 
@@ -93,7 +98,9 @@ const DoctorDashboard = () => {
               <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">Total Patients</p>
               <p className="text-3xl font-black text-gray-900 dark:text-white mt-1">1,432</p>
             </div>
-            <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500 text-xl">📈</div>
+            <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500">
+              <Activity className="w-6 h-6" />
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -188,7 +195,7 @@ const DoctorDashboard = () => {
                 <div>
                   <h5 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Contact Information</h5>
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-300 bg-gray-50 dark:bg-slate-900/50 p-3 rounded-lg border border-gray-100 dark:border-slate-700 flex items-center gap-2">
-                    <span>📞</span> {selectedPatient.userData.phone || "Not provided"}
+                    <Phone className="w-4 h-4 text-gray-400" /> {selectedPatient.userData.phone || "Not provided"}
                   </p>
                 </div>
               </div>

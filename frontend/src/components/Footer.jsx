@@ -1,5 +1,6 @@
 import React from 'react';
 import { assets } from '../assets/assets';
+import { Phone, Mail } from 'lucide-react';
 
 const Footer = () => {
     return (
@@ -33,12 +34,12 @@ const Footer = () => {
             {/* Contact Info */}
             <div>
             <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-wider">Get in Touch</h3>
-            <ul className="space-y-3 text-sm text-gray-400">
-                <li className="flex items-center gap-2">
-                    <span className="text-primary">📞</span> +1-213-456-6542
+            <ul className="flex flex-col gap-2 text-gray-600 dark:text-gray-400">
+                <li className="flex items-center gap-2 group">
+                    <Phone className="w-4 h-4 text-primary" /> +1-213-456-6542
                 </li>
-                <li className="flex items-center gap-2">
-                    <span className="text-primary">✉️</span> support@mediqueue.com
+                <li className="flex items-center gap-2 group">
+                    <Mail className="w-4 h-4 text-primary" /> info@mediqueue.com
                 </li>
             </ul>
             </div>

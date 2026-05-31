@@ -1,11 +1,13 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { toast } from 'react-toastify';
 import { AppContext } from '../context/AppContext';
+import { toast } from 'react-toastify';
 import { Card, CardContent } from '../components/ui/Card';
+import { CreditCard, QrCode, Building, Globe, User, Calendar, Lock } from 'lucide-react';
 import Button from '../components/ui/Button';
 import DoctorAvatar from '../components/ui/DoctorAvatar';
+import MockRazorpayModal from '../components/ui/MockRazorpayModal';
 
 const Payment = () => {
   const location = useLocation();
@@ -15,12 +17,14 @@ const Payment = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState('razorpay');
+  const [isMockModalOpen, setIsMockModalOpen] = useState(false);
+  const [currentAppointmentId, setCurrentAppointmentId] = useState(null);
 
   const paymentMethods = [
-    { id: 'razorpay', label: 'Razorpay', icon: '💳' },
-    { id: 'upi', label: 'UPI / QR', icon: '📱' },
-    { id: 'card', label: 'Credit / Debit Card', icon: '🏦' },
-    { id: 'netbanking', label: 'Net Banking', icon: '🌐' }
+    { id: 'razorpay', label: 'Razorpay', icon: <CreditCard className="w-5 h-5" /> },
+    { id: 'upi', label: 'UPI / QR', icon: <QrCode className="w-5 h-5" /> },
+    { id: 'card', label: 'Credit / Debit Card', icon: <CreditCard className="w-5 h-5" /> },
+    { id: 'netbanking', label: 'Net Banking', icon: <Building className="w-5 h-5" /> }
   ];
 
   // If no state is passed, redirect back
@@ -83,85 +87,34 @@ const Payment = () => {
       }
 
       const appointmentId = appData.appointmentId;
-
-      // 2. Load Razorpay Script
-      const res = await loadRazorpayScript();
-      if (!res) {
-        setIsProcessing(false);
-        return toast.error("Razorpay SDK failed to load. Are you online?");
-      }
-
-      // 3. Create Order
-      const { data: orderData } = await axios.post(
-        backendUrl + '/api/payments/create-order',
-        { appointmentId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (!orderData.success) {
-        setIsProcessing(false);
-        return toast.error(orderData.message);
-      }
-
-      // 4. Open Razorpay Checkout Modal
-      const options = {
-        key: 'mock_key_id', // Will be ignored in test mode without valid key, or you can supply actual
-        amount: orderData.order.amount,
-        currency: orderData.order.currency,
-        name: "MediQueue",
-        description: "Consultation Fee",
-        order_id: orderData.order.id,
-        handler: async function (response) {
-          try {
-            // 5. Verify Payment
-            const verifyRes = await axios.post(
-              backendUrl + '/api/payments/verify-payment',
-              {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                appointmentId
-              },
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-
-            if (verifyRes.data.success) {
-              setIsProcessing(false);
-              getDoctorsData();
-              navigate('/confirmation', { 
-                state: { doctor, selectedDate, selectedTime, appointmentId } 
-              });
-            }
-          } catch (error) {
-            console.error(error);
-            toast.error("Payment verification failed");
-            setIsProcessing(false);
-          }
-        },
-        prefill: {
-          name: userData.name,
-          email: userData.email,
-          contact: userData.phone || "0000000000"
-        },
-        theme: {
-          color: "#10B981"
-        }
-      };
-
-      const paymentObject = new window.Razorpay(options);
+      setCurrentAppointmentId(appointmentId);
+      setIsProcessing(false);
+      setIsMockModalOpen(true); // Open our mock modal instead of real Razorpay
       
-      paymentObject.on('payment.failed', function (response){
-        toast.error("Payment Failed: " + response.error.description);
-        setIsProcessing(false);
-      });
-
-      paymentObject.open();
-
     } catch (error) {
       console.log(error);
       setIsProcessing(false);
       toast.error(error.response?.data?.message || error.message);
     }
+  };
+
+  const handleMockSuccess = () => {
+    setIsMockModalOpen(false);
+    toast.success("Payment successful! (Simulated)");
+    getDoctorsData();
+    navigate('/confirmation', { 
+      state: { doctor, selectedDate, selectedTime, appointmentId: currentAppointmentId } 
+    });
+  };
+
+  const handleMockFailed = () => {
+    setIsMockModalOpen(false);
+    toast.error("Payment Failed: Simulated Failure");
+  };
+
+  const handleMockCancel = () => {
+    setIsMockModalOpen(false);
+    toast.info("Payment Cancelled");
   };
 
 
@@ -184,7 +137,7 @@ const Payment = () => {
             <Card className="border border-gray-100 dark:border-slate-700 shadow-sm bg-white dark:bg-surface-dark">
               <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center">
                 <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <span>👤</span> Patient Details
+                  <User className="w-5 h-5 text-primary" /> Patient Details
                 </h3>
               </div>
               <CardContent className="p-6">
@@ -205,7 +158,7 @@ const Payment = () => {
             <Card className="border border-gray-100 dark:border-slate-700 shadow-sm bg-white dark:bg-surface-dark">
               <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-700">
                 <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <span>📅</span> Appointment Summary
+                  <Calendar className="w-5 h-5 text-primary" /> Appointment Summary
                 </h3>
               </div>
               <CardContent className="p-6">
@@ -231,7 +184,7 @@ const Payment = () => {
             <Card className="border border-gray-100 dark:border-slate-700 shadow-sm bg-white dark:bg-surface-dark">
               <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-700">
                 <h3 className="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <span>🔒</span> Select Payment Method
+                  <Lock className="w-5 h-5 text-primary" /> Select Payment Method
                 </h3>
               </div>
               <CardContent className="p-6">
@@ -322,6 +275,15 @@ const Payment = () => {
 
         </div>
       </div>
+      
+      <MockRazorpayModal 
+        isOpen={isMockModalOpen}
+        onClose={handleMockCancel}
+        onSuccess={handleMockSuccess}
+        onFailed={handleMockFailed}
+        amount={totalAmount}
+        currencySymbol={currencySymbol}
+      />
     </div>
   );
 };

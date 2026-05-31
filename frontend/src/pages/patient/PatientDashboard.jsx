@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { AppContext } from '../../context/AppContext';
+import { Calendar, User, Search, Folder, CheckCircle, Clock } from 'lucide-react';
 
 const PatientDashboard = () => {
   const navigate = useNavigate();
@@ -15,9 +16,9 @@ const PatientDashboard = () => {
         <div className="flex flex-col md:flex-row justify-between md:items-end gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-              Hi, {userData?.name ? userData.name.split(' ')[0] : 'Patient'} 👋
+              Welcome Back, {userData?.name ? userData.name.split(' ')[0] : 'Patient'}
             </h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-2">Patient Dashboard - Manage your healthcare journey.</p>
+            <p className="text-gray-500 dark:text-gray-400 mt-2">Patient Dashboard</p>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="primary" onClick={() => navigate('/patient/book-appointment')}>Book Appointment</Button>
@@ -65,8 +66,8 @@ const PatientDashboard = () => {
                 <div className="absolute top-0 left-0 w-1.5 h-full bg-primary"></div>
                 <div className="p-6 flex flex-col md:flex-row justify-between md:items-center gap-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-accent dark:bg-slate-700 flex items-center justify-center text-primary text-2xl">
-                      👨‍⚕️
+                    <div className="w-16 h-16 rounded-full bg-accent dark:bg-slate-700 flex items-center justify-center text-primary">
+                      <User className="w-8 h-8" />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white">Dr. Richard James</h3>
@@ -76,9 +77,9 @@ const PatientDashboard = () => {
                   
                   <div className="flex flex-col md:items-end gap-2">
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                      <span>📅 Tomorrow</span>
+                      <Calendar className="w-4 h-4 text-primary" /> <span>Tomorrow</span>
                       <span className="text-gray-300 dark:text-gray-600">|</span>
-                      <span className="font-semibold text-gray-900 dark:text-white">10:30 AM</span>
+                      <Clock className="w-4 h-4 text-primary" /> <span className="font-semibold text-gray-900 dark:text-white">10:30 AM</span>
                     </div>
                     <span className="inline-block px-3 py-1 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 text-xs font-bold rounded-full">
                       Awaiting Confirmation
@@ -95,7 +96,9 @@ const PatientDashboard = () => {
                 <div className="divide-y divide-gray-100 dark:divide-slate-700/50">
                   
                   <div className="p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600">✓</div>
+                    <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600">
+                      <CheckCircle className="w-5 h-5" />
+                    </div>
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">Appointment Completed</p>
                       <p className="text-xs text-gray-500">Dr. Sarah Patel • Cardiology</p>
@@ -104,7 +107,9 @@ const PatientDashboard = () => {
                   </div>
 
                   <div className="p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">📅</div>
+                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+                      <Calendar className="w-5 h-5" />
+                    </div>
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-gray-900 dark:text-white">New Booking Created</p>
                       <p className="text-xs text-gray-500">Dr. Richard James • General physician</p>
@@ -129,7 +134,7 @@ const PatientDashboard = () => {
                   className="flex flex-col items-center justify-center p-6 bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 hover:border-primary hover:shadow-md transition-all group"
                 >
                   <div className="w-12 h-12 bg-accent dark:bg-slate-700 rounded-full flex items-center justify-center text-primary group-hover:scale-110 transition-transform mb-3">
-                    🔍
+                    <Search className="w-6 h-6" />
                   </div>
                   <span className="font-semibold text-gray-900 dark:text-white">Find Doctor</span>
                 </button>
@@ -139,7 +144,7 @@ const PatientDashboard = () => {
                   className="flex flex-col items-center justify-center p-6 bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 hover:border-primary hover:shadow-md transition-all group"
                 >
                   <div className="w-12 h-12 bg-accent dark:bg-slate-700 rounded-full flex items-center justify-center text-primary group-hover:scale-110 transition-transform mb-3">
-                    📁
+                    <Folder className="w-6 h-6" />
                   </div>
                   <span className="font-semibold text-gray-900 dark:text-white">Appointment History</span>
                 </button>

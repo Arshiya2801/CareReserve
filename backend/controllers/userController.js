@@ -1,5 +1,6 @@
 import User from '../models/userModel.js';
 import generateToken from '../utils/generateToken.js';
+import crypto from 'crypto';
 
 // @desc    Register a new user
 // @route   POST /api/users/register
@@ -99,4 +100,63 @@ const logoutUser = (req, res) => {
   res.json({ message: 'User logged out successfully' });
 };
 
-export { registerUser, loginUser, getUserProfile, logoutUser };
+// @desc    Forgot Password
+// @route   POST /api/users/forgot-password
+// @access  Public
+const forgotPassword = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found with this email' });
+    }
+
+    // Generate random token
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    
+    // Hash token and set to resetPasswordToken field
+    user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
+    
+    await user.save();
+
+    res.status(200).json({ 
+      success: true, 
+      message: 'Password reset link sent (Demo)',
+      demoToken: resetToken // For demo purposes, we send token back
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Reset Password
+// @route   PUT /api/users/reset-password/:token
+// @access  Public
+const resetPassword = async (req, res) => {
+  try {
+    // Get hashed token
+    const resetPasswordToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
+    // Set new password
+    user.password = req.body.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    
+    await user.save();
+
+    res.status(200).json({ success: true, message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export { registerUser, loginUser, getUserProfile, logoutUser, forgotPassword, resetPassword };

@@ -18,6 +18,8 @@ import QueueTracking from './pages/QueueTracking'
 import PatientQueueTracking from './pages/patient/PatientQueueTracking'
 import AppointmentHistory from './pages/patient/AppointmentHistory'
 import Notifications from './pages/patient/Notifications'
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicLayout from './components/layouts/PublicLayout'
 import PatientLayout from './components/layouts/PatientLayout'
@@ -29,8 +31,10 @@ const App = () => {
       {/* Public Routes with Navbar and Footer */}
       <Route element={<PublicLayout />}>
         <Route path='/' element={<Home/>} />
-        <Route path='/login' element={<Login/>} />
-        <Route path='/signup' element={<Signup/>} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path='/design-system' element={<DesignSystem/>} />
         <Route path='/doctors/:speciality' element={<Doctors/>} />
         <Route path='/doctors' element={<Doctors/>} />

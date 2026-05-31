@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '../components/ui/Card';
+import DoctorAvatar from '../components/ui/DoctorAvatar';
 import Button from '../components/ui/Button';
 
 const AppointmentConfirmation = () => {
@@ -75,7 +76,7 @@ const AppointmentConfirmation = () => {
             </div>
 
             <div className="flex items-center gap-4 py-6 border-y border-gray-100 dark:border-slate-700">
-              <img src={doctor.image} alt={doctor.name} className="w-20 h-20 rounded-2xl object-cover bg-gray-50 border border-gray-100 dark:border-slate-700" />
+              <DoctorAvatar doctor={doctor} className="w-20 h-20 rounded-2xl text-2xl shadow-sm" showContainer={false} />
               <div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">{doctor.name}</h3>
                 <p className="text-primary font-medium">{doctor.speciality}</p>

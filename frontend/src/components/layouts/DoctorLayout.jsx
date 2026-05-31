@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import Sidebar from '../ui/Sidebar';
 import { AppContext } from '../../context/AppContext';
+import { Home, Calendar, Users, List, User, Bell, Settings } from 'lucide-react';
 
 const DoctorLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -15,13 +16,13 @@ const DoctorLayout = () => {
   };
 
   const navItems = [
-    { label: 'Dashboard', path: '/doctor/dashboard', icon: '📊' },
-    { label: 'Appointments', path: '/doctor/appointments', icon: '📅' },
-    { label: 'Patients', path: '/doctor/patients', icon: '👥' },
-    { label: 'Queue Management', path: '/doctor/appointments', icon: '⏱️' }, // Combined with appointments or dedicated
-    { label: 'Notifications', path: '#', icon: '🔔' },
-    { label: 'Profile', path: '/my-profile', icon: '👤' },
-    { label: 'Settings', path: '/doctor/settings', icon: '⚙️' },
+    { label: 'Dashboard', path: '/doctor/dashboard', icon: <Home className="w-5 h-5" /> },
+    { label: 'Appointments', path: '/doctor/appointments', icon: <Calendar className="w-5 h-5" /> },
+    { label: 'Patients', path: '/doctor/patients', icon: <Users className="w-5 h-5" /> },
+    { label: 'Queue Management', path: '/doctor/queue', icon: <List className="w-5 h-5" /> },
+    { label: 'Notifications', path: '#', icon: <Bell className="w-5 h-5" /> },
+    { label: 'Profile', path: '/doctor/profile', icon: <User className="w-5 h-5" /> },
+    { label: 'Settings', path: '/doctor/settings', icon: <Settings className="w-5 h-5" /> },
   ];
 
   return (
